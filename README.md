@@ -57,6 +57,10 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # Bağımlılıkları yükle
 pip install -r requirements.txt
 
+# Environment variables ayarla
+cp .env.example .env
+# .env dosyasını editleyip gerçek değerleri girin (MySQL şifreniz, vb.)
+
 # MySQL veritabanını oluştur
 mysql -u root -p
 CREATE DATABASE uniring_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -192,4 +196,3 @@ Demo sunumunda gösterilecekler:
 ## 📄 Lisans
 
 Bu proje TOBB ETÜ BIL372 Veritabanı Sistemleri dersi kapsamında eğitim amaçlı geliştirilmiştir.
-# UNIRING
