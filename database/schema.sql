@@ -214,7 +214,7 @@ CREATE TABLE Odemeler (
 CREATE TABLE Yorumlar (
     yorumID INT PRIMARY KEY AUTO_INCREMENT,
     rezervasyonID INT NOT NULL,
-    degerlendiren KullaniciID INT NOT NULL,
+    degerlendirenKullaniciID INT NOT NULL,
     degerlendirilenKullaniciID INT NOT NULL,
     seferID INT NOT NULL,
     puan TINYINT NOT NULL CHECK (puan BETWEEN 1 AND 5),
@@ -223,7 +223,7 @@ CREATE TABLE Yorumlar (
     yorumTarihi DATETIME DEFAULT CURRENT_TIMESTAMP,
     gorunurluk ENUM('Genel', 'Sadece Kullanıcı', 'Gizli') DEFAULT 'Genel',
     FOREIGN KEY (rezervasyonID) REFERENCES Rezervasyonlar(rezervasyonID) ON DELETE CASCADE,
-    FOREIGN KEY (degerlendiren KullaniciID) REFERENCES Kullanicilar(kullaniciID) ON DELETE CASCADE,
+    FOREIGN KEY (degerlendirenKullaniciID) REFERENCES Kullanicilar(kullaniciID) ON DELETE CASCADE,
     FOREIGN KEY (degerlendirilenKullaniciID) REFERENCES Kullanicilar(kullaniciID) ON DELETE CASCADE,
     FOREIGN KEY (seferID) REFERENCES Seferler(seferID) ON DELETE CASCADE,
     INDEX idx_rezervasyon (rezervasyonID),
