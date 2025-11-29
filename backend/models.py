@@ -278,7 +278,7 @@ class Yorumlar(db.Model):
     
     yorumID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     rezervasyonID = db.Column(db.Integer, db.ForeignKey('Rezervasyonlar.rezervasyonID'), nullable=False)
-    degerlendiren KullaniciID = db.Column(db.Integer, db.ForeignKey('Kullanicilar.kullaniciID'), nullable=False)
+    degerlendirenKullaniciID = db.Column(db.Integer, db.ForeignKey('Kullanicilar.kullaniciID'), nullable=False)
     degerlendirilenKullaniciID = db.Column(db.Integer, db.ForeignKey('Kullanicilar.kullaniciID'), nullable=False)
     seferID = db.Column(db.Integer, db.ForeignKey('Seferler.seferID'), nullable=False)
     puan = db.Column(db.SmallInteger, nullable=False)
@@ -291,7 +291,7 @@ class Yorumlar(db.Model):
         return {
             'yorumID': self.yorumID,
             'rezervasyonID': self.rezervasyonID,
-            'degerlendiren KullaniciID': self.degerlendiren KullaniciID,
+            'degerlendirenKullaniciID': self.degerlendirenKullaniciID,
             'degerlendirilenKullaniciID': self.degerlendirilenKullaniciID,
             'puan': self.puan,
             'yorum': self.yorum,
