@@ -206,3 +206,6 @@ dmypy.json
 # Keep README files
 !README.md
 !*/README.md
+
+*.pdf
+*.docx
