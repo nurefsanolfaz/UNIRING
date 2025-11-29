@@ -1,18 +1,15 @@
 """
 UNIRING - University Carpooling Platform
 Flask Backend Application
-BIL372 Database Systems Project
 """
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 import os
 
 # Flask app initialization
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+CORS(app)
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -20,17 +17,19 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
     'mysql+pymysql://root:password@localhost/uniring_db'
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'uniring-secret-key-2025'  # Change in production
+app.config['SECRET_KEY'] = 'uniring-secret-key-2025'
 
-# Database instance
-db = SQLAlchemy(app)
+# Initialize database
+from models import db
+db.init_app(app)
 
-# Import models
-from models import (
-    Universiteler, Kullanicilar, Araclar, Seferler,
-    SeferGuzergahNoktalari, Rezervasyonlar, Cuzdanlar,
-    Odemeler, Yorumlar, Mesajlar
-)
+# Import models after db init
+with app.app_context():
+    from models import (
+        Universiteler, Kullanicilar, Araclar, Seferler,
+        SeferGuzergahNoktalari, Rezervasyonlar, Cuzdanlar,
+        Odemeler, Yorumlar, Mesajlar
+    )
 
 # Import routes
 from routes import auth, seferler, rezervasyonlar, kullanicilar
@@ -50,22 +49,6 @@ def index():
         'status': 'healthy'
     })
 
-# Database initialization
-@app.route('/api/init-db')
-def init_db():
-    """Initialize database tables"""
-    try:
-        db.create_all()
-        return jsonify({
-            'message': 'Database tables created successfully!',
-            'status': 'success'
-        })
-    except Exception as e:
-        return jsonify({
-            'message': f'Error creating tables: {str(e)}',
-            'status': 'error'
-        }), 500
-
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
@@ -83,4 +66,4 @@ def internal_error(error):
     }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)
