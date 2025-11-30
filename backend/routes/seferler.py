@@ -11,10 +11,13 @@ def get_seferler():
         # Query parametreleri
         sefer_tarihi = request.args.get('tarih')
         katilim_kapsami = request.args.get('kapsam')
-        durum = request.args.get('durum', 'Aktif')
+        durum = request.args.get('durum')
         
         # Base query
-        query = Seferler.query.filter_by(seferDurumu=durum)
+        query = Seferler.query
+
+        if durum:
+            query = query.filter(Seferler.seferDurumu == durum)
         
         if sefer_tarihi:
             query = query.filter(Seferler.seferTarihi == sefer_tarihi)

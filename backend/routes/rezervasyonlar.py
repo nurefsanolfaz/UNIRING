@@ -6,6 +6,7 @@ Rezervasyon oluşturma, onaylama, iptal etme işlemleri
 from flask import Blueprint, request, jsonify
 from models import db, Rezervasyonlar, Seferler, Kullanicilar, SeferGuzergahNoktalari, Odemeler
 from datetime import datetime
+from decimal import Decimal
 
 bp = Blueprint('rezervasyonlar', __name__, url_prefix='/api/rezervasyonlar')
 
@@ -193,14 +194,17 @@ def onayla_rezervasyon(rezervasyon_id):
         rezervasyon.onaylanmaTarihi = datetime.utcnow()
         
         # Ödeme kaydı oluştur
+        tutar = rezervasyon.odenecekTutar
+        komisyon_orani = Decimal('0.05')
+
         yeni_odeme = Odemeler(
             rezervasyonID=rezervasyon.rezervasyonID,
             seferID=sefer.seferID,
             borcluID=rezervasyon.yolcuID,
             alacakliID=sefer.olusturanKullaniciID,
-            tutar=rezervasyon.odenecekTutar,
-            platformKomisyonu=rezervasyon.odenecekTutar * 0.05,  # %5 komisyon
-            netTutar=rezervasyon.odenecekTutar * 0.95,
+            tutar=tutar,
+            platformKomisyonu=tutar * komisyon_orani,  # %5 komisyon
+            netTutar=tutar * (Decimal('1') - komisyon_orani),
             odemeTipi='Cüzdan',
             odemeDurumu='Ödenmedi'
         )
