@@ -5,46 +5,46 @@
 
 -- ============================================
 -- QUERY 1: En Popüler Organizatörler
--- Son 3 ayda en çok tamamlanmış sefer düzenleyen kullanıcılar
+-- Tamamlanmış sefer düzenleyen kullanıcılar
 -- JOIN, GROUP BY, HAVING, Subquery kullanımı
 -- ============================================
-SELECT 
+SELECT
     k.kullaniciID,
     CONCAT(k.ad, ' ', k.soyad) AS organizatorAdi,
     uni.universiteAdi,
     k.guvenlikSkoru,
     COUNT(DISTINCT s.seferID) AS toplamSeferSayisi,
     COUNT(DISTINCT CASE WHEN s.seferDurumu = 'Tamamlandı' THEN s.seferID END) AS tamamlananSeferSayisi,
-    ROUND(100.0 * COUNT(DISTINCT CASE WHEN s.seferDurumu = 'Tamamlandı' THEN s.seferID END) / 
-          COUNT(DISTINCT s.seferID), 2) AS basariYuzdesi,
+    ROUND(100.0 * COUNT(DISTINCT CASE WHEN s.seferDurumu = 'Tamamlandı' THEN s.seferID END) /
+          NULLIF(COUNT(DISTINCT s.seferID), 0), 2) AS basariYuzdesi,
     COUNT(DISTINCT r.rezervasyonID) AS tasinanYolcuSayisi,
-    SUM(o.netTutar) AS toplamKazanc,
-    AVG(y.puan) AS ortalamaYolcuPuani
+    ROUND(COALESCE(SUM(o.netTutar), 0), 2) AS toplamKazanc,
+    ROUND(AVG(y.puan), 2) AS ortalamaYolcuPuani
 FROM Kullanicilar k
 INNER JOIN Universiteler uni ON k.universiteID = uni.universiteID
 INNER JOIN Seferler s ON k.kullaniciID = s.olusturanKullaniciID
 LEFT JOIN Rezervasyonlar r ON s.seferID = r.seferID AND r.durum = 'Tamamlandı'
 LEFT JOIN Odemeler o ON s.seferID = o.seferID AND o.alacakliID = k.kullaniciID AND o.odemeDurumu = 'Ödendi'
 LEFT JOIN Yorumlar y ON k.kullaniciID = y.degerlendirilenKullaniciID
-WHERE s.olusturulmaTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 3 MONTH)
+WHERE s.seferDurumu = 'Tamamlandı'  -- Sadece tamamlanmış seferler
 GROUP BY k.kullaniciID
-HAVING toplamSeferSayisi >= 3
-ORDER BY toplamSeferSayisi DESC, ortalamaYolcuPuani DESC
+HAVING toplamSeferSayisi >= 1  -- En az 1 tamamlanmış sefer
+ORDER BY tamamlananSeferSayisi DESC, ortalamaYolcuPuani DESC, toplamKazanc DESC
 LIMIT 10;
 
 -- ============================================
 -- QUERY 2: Üniversiteler Arası Sefer Analizi
--- Hangi üniversiteler arası en çok sefer var?
+-- Popüler güzergahlar analizi
 -- SELF JOIN, Multiple JOINs, Aggregate Functions
 -- ============================================
 SELECT 
-    uni1.universiteAdi AS kalkisUniversitesi,
-    uni1.sehir AS kalkisSehri,
-    uni2.universiteAdi AS varisUniversitesi,
-    uni2.sehir AS varisSehri,
+    uni1.universiteAdi AS organizatorUniversitesi,
+    uni1.sehir AS organizatorSehir,
+    kalkis.konumAdi AS kalkisNoktasi,
+    varis.konumAdi AS varisNoktasi,
     COUNT(DISTINCT s.seferID) AS seferSayisi,
     COUNT(DISTINCT r.rezervasyonID) AS rezervasyonSayisi,
-    AVG(s.temelFiyat) AS ortalamaMaliyet,
+    ROUND(AVG(s.temelFiyat), 2) AS ortalamaMaliyet,
     SUM(CASE WHEN s.seferDurumu = 'Tamamlandı' THEN 1 ELSE 0 END) AS tamamlananSeferler,
     ROUND(AVG(sgn.mesafeOncekiNoktaya), 2) AS ortalamaMesafeKm
 FROM Seferler s
@@ -55,12 +55,9 @@ INNER JOIN Kullanicilar k ON s.olusturanKullaniciID = k.kullaniciID
 INNER JOIN Universiteler uni1 ON k.universiteID = uni1.universiteID
 INNER JOIN SeferGuzergahNoktalari sgn ON s.seferID = sgn.seferID
 LEFT JOIN Rezervasyonlar r ON s.seferID = r.seferID AND r.durum NOT IN ('Reddedildi', 'İptal Edildi')
-LEFT JOIN Kullanicilar k2 ON r.yolcuID = k2.kullaniciID
-LEFT JOIN Universiteler uni2 ON k2.universiteID = uni2.universiteID
-WHERE s.seferTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
-  AND uni1.universiteID != uni2.universiteID
-GROUP BY uni1.universiteID, uni2.universiteID
-HAVING seferSayisi >= 2
+WHERE s.seferDurumu IN ('Tamamlandı', 'Aktif', 'Planlanıyor')
+GROUP BY uni1.universiteID, kalkis.konumAdi, varis.konumAdi
+HAVING seferSayisi >= 1
 ORDER BY seferSayisi DESC, rezervasyonSayisi DESC
 LIMIT 20;
 
@@ -74,17 +71,17 @@ SELECT
     HOUR(s.kalkisZamani) AS saat,
     COUNT(DISTINCT s.seferID) AS seferSayisi,
     COUNT(DISTINCT r.rezervasyonID) AS rezervasyonSayisi,
-    AVG(s.mevcutDoluluk) AS ortalamaDoluluk,
-    ROUND(AVG(s.mevcutDoluluk / s.maxKapasite * 100), 2) AS dolulukYuzdesi,
-    SUM(s.temelFiyat * s.mevcutDoluluk) AS tahminiGelir,
+    ROUND(AVG(s.mevcutDoluluk), 2) AS ortalamaDoluluk,
+    ROUND(AVG(s.mevcutDoluluk / NULLIF(s.maxKapasite, 0) * 100), 2) AS dolulukYuzdesi,
+    ROUND(SUM(s.temelFiyat * s.mevcutDoluluk), 2) AS tahminiGelir,
     RANK() OVER (ORDER BY COUNT(DISTINCT s.seferID) DESC) AS populerlikSirasi
 FROM Seferler s
 LEFT JOIN Rezervasyonlar r ON s.seferID = r.seferID AND r.durum IN ('Onaylandı', 'Tamamlandı')
-WHERE s.seferTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 60 DAY)
-  AND s.seferDurumu != 'İptal Edildi'
+WHERE s.seferDurumu != 'İptal Edildi'
 GROUP BY DAYNAME(s.seferTarihi), HOUR(s.kalkisZamani)
-HAVING seferSayisi >= 3
-ORDER BY seferSayisi DESC, saat ASC;
+HAVING seferSayisi >= 1
+ORDER BY seferSayisi DESC, saat ASC
+LIMIT 20;
 
 -- ============================================
 -- QUERY 4: Gelir ve Kazanç Analizi (Correlated Subquery)
@@ -94,22 +91,20 @@ SELECT
     k.kullaniciID,
     CONCAT(k.ad, ' ', k.soyad) AS kullaniciAdi,
     uni.universiteAdi,
-    -- Organizatör geliri
+    -- Organizatör geliri (TÜM ZAMANLAR)
     (SELECT COALESCE(SUM(o.netTutar), 0)
      FROM Odemeler o
      WHERE o.alacakliID = k.kullaniciID
        AND o.odemeDurumu = 'Ödendi'
-       AND o.islemTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 3 MONTH)
-    ) AS son3AyKazanc,
-    -- Yolcu harcaması
+    ) AS toplamKazanc,
+    -- Yolcu harcaması (TÜM ZAMANLAR)
     (SELECT COALESCE(SUM(o.tutar), 0)
      FROM Odemeler o
      WHERE o.borcluID = k.kullaniciID
        AND o.odemeDurumu = 'Ödendi'
-       AND o.islemTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 3 MONTH)
-    ) AS son3AyHarcama,
+    ) AS toplamHarcama,
     -- Net bakiye
-    c.bakiye AS mevcutBakiye,
+    ROUND(c.bakiye, 2) AS mevcutBakiye,
     -- Sefer sayıları
     (SELECT COUNT(*)
      FROM Seferler s
@@ -119,7 +114,7 @@ SELECT
     -- Ortalama kazanç per sefer
     CASE 
         WHEN (SELECT COUNT(*) FROM Seferler WHERE olusturanKullaniciID = k.kullaniciID AND seferDurumu = 'Tamamlandı') > 0
-        THEN ROUND((SELECT SUM(o.netTutar) FROM Odemeler o WHERE o.alacakliID = k.kullaniciID AND o.odemeDurumu = 'Ödendi') / 
+        THEN ROUND((SELECT COALESCE(SUM(o.netTutar), 0) FROM Odemeler o WHERE o.alacakliID = k.kullaniciID AND o.odemeDurumu = 'Ödendi') / 
                    (SELECT COUNT(*) FROM Seferler WHERE olusturanKullaniciID = k.kullaniciID AND seferDurumu = 'Tamamlandı'), 2)
         ELSE 0
     END AS seferBasinaOrtalamaKazanc
@@ -132,7 +127,7 @@ WHERE k.hesapDurumu = 'Aktif'
       WHERE s.olusturanKullaniciID = k.kullaniciID 
         AND s.seferDurumu = 'Tamamlandı'
   )
-ORDER BY son3AyKazanc DESC
+ORDER BY toplamKazanc DESC
 LIMIT 15;
 
 -- ============================================
@@ -148,19 +143,18 @@ SELECT
     COUNT(DISTINCT CASE WHEN r.durum = 'Onaylandı' THEN r.rezervasyonID END) AS onaylananSayisi,
     COUNT(DISTINCT CASE WHEN r.durum = 'Reddedildi' THEN r.rezervasyonID END) AS rededilenSayisi,
     ROUND(100.0 * COUNT(DISTINCT CASE WHEN r.durum = 'Onaylandı' THEN r.rezervasyonID END) / 
-          COUNT(DISTINCT r.rezervasyonID), 2) AS onaylamaYuzdesi,
-    AVG(TIMESTAMPDIFF(MINUTE, r.olusturulmaTarihi, r.onaylanmaTarihi)) AS ortalamaOnaylamaSuresiDakika,
+          NULLIF(COUNT(DISTINCT r.rezervasyonID), 0), 2) AS onaylamaYuzdesi,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, r.olusturulmaTarihi, r.onaylanmaTarihi)), 2) AS ortalamaOnaylamaSuresiDakika,
     MIN(TIMESTAMPDIFF(MINUTE, r.olusturulmaTarihi, r.onaylanmaTarihi)) AS enHizliOnayDakika,
     MAX(TIMESTAMPDIFF(MINUTE, r.olusturulmaTarihi, r.onaylanmaTarihi)) AS enYavasOnayDakika,
-    k.guvenlikSkoru
+    ROUND(k.guvenlikSkoru, 2) AS guvenlikSkoru
 FROM Kullanicilar k
 INNER JOIN Universiteler uni ON k.universiteID = uni.universiteID
 INNER JOIN Seferler s ON k.kullaniciID = s.olusturanKullaniciID
 INNER JOIN Rezervasyonlar r ON s.seferID = r.seferID
 WHERE r.onaylanmaTarihi IS NOT NULL
-  AND r.olusturulmaTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
 GROUP BY k.kullaniciID
-HAVING toplamRezervasyonTalebi >= 5
+HAVING toplamRezervasyonTalebi >= 2
 ORDER BY onaylamaYuzdesi DESC, ortalamaOnaylamaSuresiDakika ASC
 LIMIT 20;
 
@@ -303,11 +297,10 @@ WITH AylikIstatistikler AS (
         COUNT(DISTINCT r.rezervasyonID) AS rezervasyonSayisi,
         COUNT(DISTINCT s.olusturanKullaniciID) AS aktifOrganizatorSayisi,
         COUNT(DISTINCT r.yolcuID) AS aktifYolcuSayisi,
-        SUM(r.odenecekTutar) AS toplamIslemHacmi,
-        AVG(s.mevcutDoluluk / s.maxKapasite * 100) AS ortalamaDolulukYuzdesi
+        COALESCE(SUM(r.odenecekTutar), 0) AS toplamIslemHacmi,
+        ROUND(AVG(s.mevcutDoluluk / NULLIF(s.maxKapasite, 0) * 100), 2) AS ortalamaDolulukYuzdesi
     FROM Seferler s
     LEFT JOIN Rezervasyonlar r ON s.seferID = r.seferID AND r.durum NOT IN ('Reddedildi', 'İptal Edildi')
-    WHERE s.olusturulmaTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH)
     GROUP BY DATE_FORMAT(s.olusturulmaTarihi, '%Y-%m')
 )
 SELECT 
@@ -317,7 +310,7 @@ SELECT
     aktifOrganizatorSayisi,
     aktifYolcuSayisi,
     ROUND(toplamIslemHacmi, 2) AS toplamIslemHacmi,
-    ROUND(ortalamaDolulukYuzdesi, 2) AS ortalamaDolulukYuzdesi,
+    ortalamaDolulukYuzdesi,
     -- Bir önceki aya göre değişim
     LAG(seferSayisi, 1) OVER (ORDER BY donem) AS oncekiAySeferSayisi,
     ROUND(100.0 * (seferSayisi - LAG(seferSayisi, 1) OVER (ORDER BY donem)) / 
