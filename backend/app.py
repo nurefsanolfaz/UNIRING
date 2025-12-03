@@ -9,7 +9,13 @@ import os
 
 # Flask app initialization
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:8081", "http://localhost:19006"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-User-ID"]
+    }
+})
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -32,13 +38,14 @@ with app.app_context():
     )
 
 # Import routes
-from routes import auth, seferler, rezervasyonlar, kullanicilar
+from routes import auth, seferler, rezervasyonlar, kullanicilar, araclar
 
 # Register blueprints
 app.register_blueprint(auth.bp)
 app.register_blueprint(seferler.bp)
 app.register_blueprint(rezervasyonlar.bp)
 app.register_blueprint(kullanicilar.bp)
+app.register_blueprint(araclar.bp)
 
 
 @app.route('/api/seferler/<int:sefer_id>/katil', methods=['POST'])

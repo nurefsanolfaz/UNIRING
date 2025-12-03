@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { COLORS, FONTS } from '../constants/config';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
@@ -102,6 +102,14 @@ export default function ProfileScreen() {
         {/* Menü */}
         <Card mode="contained" style={[styles.card, styles.menuCard]}>
           <Card.Content style={styles.cardContent}>
+            <List.Item
+              title="Araçlarım"
+              titleStyle={styles.menuItemTitle}
+              left={() => <Icon name="car-multiple" size={24} color={COLORS.primary} />}
+              right={() => <Icon name="chevron-right" size={24} color={COLORS.textSecondary} />}
+              onPress={() => navigation.navigate('MyVehicles')}
+            />
+            <Divider />
             <List.Item
               title="Ayarlar"
               titleStyle={styles.menuItemTitle}
