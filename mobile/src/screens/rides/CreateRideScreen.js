@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, Text, Title, HelperText, Snackbar, Surface } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { TextInput, Button, Text, Title, HelperText, Snackbar, Surface, Menu, Divider } from 'react-native-paper';
 import { createRide } from '../../services/rideService';
+import vehicleService from '../../services/vehicleService';
 import { COLORS } from '../../constants/config';
 import { useAuth } from '../../context/AuthContext';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 const INITIAL_FORM_STATE = {
   startLocation: '',
@@ -33,6 +35,34 @@ export default function CreateRideScreen({ navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [snackbar, setSnackbar] = useState({ visible: false, message: '', action: undefined });
   const { user } = useAuth();
+  const [vehicles, setVehicles] = useState([]);
+  const [vehicleMenuVisible, setVehicleMenuVisible] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+
+  useEffect(() => {
+    loadVehicles();
+  }, []);
+
+  const loadVehicles = async () => {
+    try {
+      const userId = getUserId();
+      if (!userId) return;
+
+      const response = await vehicleService.getMyVehicles(userId);
+      if (response.success) {
+        // Sadece onaylanmış araçları göster
+        const approvedVehicles = response.araclar.filter(v => v.onayDurumu === 'Onaylandı');
+        setVehicles(approvedVehicles);
+        
+        if (approvedVehicles.length > 0) {
+          setSelectedVehicle(approvedVehicles[0]);
+          setFormData({ ...formData, vehicleId: approvedVehicles[0].aracID.toString() });
+        }
+      }
+    } catch (error) {
+      console.error('Araç yükleme hatası:', error);
+    }
+  };
 
   const getUserId = () => {
     if (!user) return null;
@@ -80,6 +110,22 @@ export default function CreateRideScreen({ navigation }) {
       return;
     }
 
+    // Araç kontrolü
+    if (!selectedVehicle) {
+      Alert.alert(
+        'Araç Seçiniz',
+        'Sefer oluşturmak için önce bir araç seçmelisiniz.',
+        [
+          { text: 'İptal', style: 'cancel' },
+          { 
+            text: 'Araç Ekle', 
+            onPress: () => navigation.navigate('Profile', { screen: 'AddVehicle' })
+          }
+        ]
+      );
+      return;
+    }
+
     const departure = new Date(formData.departureTime);
     if (Number.isNaN(departure.getTime())) {
       setErrorMessage('Kalkış zamanı formatı geçersiz. Örn: 2025-12-05 15:30');
@@ -100,6 +146,7 @@ export default function CreateRideScreen({ navigation }) {
 
     const payload = {
       olusturanKullaniciID: userId,
+      aracID: selectedVehicle.aracID,
       seferTipi: 'Araç Paylaşımı',
       katilimKapsami: 'Tüm Üniversiteler',
       seferTarihi: departure.toISOString().split('T')[0],
@@ -155,6 +202,59 @@ export default function CreateRideScreen({ navigation }) {
         )}
 
         <Surface style={styles.formCard} elevation={2}>
+          {/* Araç Seçimi */}
+          {vehicles.length > 0 ? (
+            <Menu
+              visible={vehicleMenuVisible}
+              onDismiss={() => setVehicleMenuVisible(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setVehicleMenuVisible(true)}
+                  style={styles.vehicleButton}
+                  icon="car"
+                  contentStyle={styles.vehicleButtonContent}
+                >
+                  {selectedVehicle 
+                    ? `${selectedVehicle.marka} ${selectedVehicle.model} - ${selectedVehicle.plaka}`
+                    : 'Araç Seçin'}
+                </Button>
+              }
+            >
+              {vehicles.map((vehicle) => (
+                <Menu.Item
+                  key={vehicle.aracID}
+                  onPress={() => {
+                    setSelectedVehicle(vehicle);
+                    setFormData({ ...formData, vehicleId: vehicle.aracID.toString() });
+                    setVehicleMenuVisible(false);
+                  }}
+                  title={`${vehicle.marka} ${vehicle.model}`}
+                  leadingIcon="car"
+                />
+              ))}
+              <Divider />
+              <Menu.Item
+                onPress={() => {
+                  setVehicleMenuVisible(false);
+                  navigation.navigate('Profile', { screen: 'AddVehicle' });
+                }}
+                title="Yeni Araç Ekle"
+                leadingIcon="plus"
+              />
+            </Menu>
+          ) : (
+            <Button
+              mode="outlined"
+              onPress={() => navigation.navigate('Profile', { screen: 'AddVehicle' })}
+              style={styles.vehicleButton}
+              icon="plus-circle"
+              textColor="#F44336"
+            >
+              Önce Araç Ekleyin
+            </Button>
+          )}
+
           <TextInput
             label="Başlangıç Noktası *"
             value={formData.startLocation}
@@ -288,6 +388,14 @@ const styles = StyleSheet.create({
   },
   helperText: {
     marginBottom: 16,
+  },
+  vehicleButton: {
+    marginBottom: 15,
+    borderColor: COLORS.primary,
+    borderWidth: 1.5,
+  },
+  vehicleButtonContent: {
+    height: 50,
   },
   input: {
     marginBottom: 15,

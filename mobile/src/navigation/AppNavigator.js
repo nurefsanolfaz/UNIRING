@@ -7,6 +7,9 @@ import CreateRideScreen from '../screens/rides/CreateRideScreen';
 import RideDetailScreen from '../screens/rides/RideDetailScreen';
 import MyRidesScreen from '../screens/rides/MyRidesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MyVehiclesScreen from '../screens/vehicles/MyVehiclesScreen';
+import AddVehicleScreen from '../screens/vehicles/AddVehicleScreen';
+import EditVehicleScreen from '../screens/vehicles/EditVehicleScreen';
 import { COLORS } from '../constants/config';
 
 const Tab = createBottomTabNavigator();
@@ -73,6 +76,44 @@ function MyRidesStack() {
         name="RideDetail" 
         component={RideDetailScreen}
         options={{ title: 'Sefer Detayı' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Profil Stack'i
+function ProfileStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: COLORS.primary,
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
+      <Stack.Screen 
+        name="ProfileMain" 
+        component={ProfileScreen}
+        options={{ title: 'Profil' }}
+      />
+      <Stack.Screen 
+        name="MyVehicles" 
+        component={MyVehiclesScreen}
+        options={{ title: 'Araçlarım' }}
+      />
+      <Stack.Screen 
+        name="AddVehicle" 
+        component={AddVehicleScreen}
+        options={{ title: 'Araç Ekle' }}
+      />
+      <Stack.Screen 
+        name="EditVehicle" 
+        component={EditVehicleScreen}
+        options={{ title: 'Araç Düzenle' }}
       />
     </Stack.Navigator>
   );
@@ -153,17 +194,9 @@ export default function MainTabNavigator() {
       />
       <Tab.Screen 
         name="Profile" 
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: COLORS.primary,
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          title: 'Profil',
+          headerShown: false,
           tabBarLabel: 'Profil',
         }}
       />
