@@ -121,7 +121,7 @@ export default function HomeScreen({ navigation }) {
         return;
       }
 
-      console.log('⏳ Rezervasyon oluşturuluyor...');
+      console.log('   Rezervasyon oluşturuluyor...');
       
       const requestData = {
         seferID: ride.seferID,
@@ -130,16 +130,16 @@ export default function HomeScreen({ navigation }) {
         inisNoktaID: varis.noktaID,
         yolcuSayisi: 1,
       };
-      console.log('📤 API isteği:', requestData);
+      console.log('   API isteği:', requestData);
       
       const response = await createBooking(requestData);
-      console.log('✅ API yanıtı:', response);
+      console.log('  API yanıtı:', response);
       
-      alert('✅ Başarılı! Rezervasyonun oluşturuldu!');
+      alert('  Başarılı! Rezervasyonun oluşturuldu!');
       onRefresh();
     } catch (error) {
-      console.error('❌ Hızlı rezervasyon hatası:', error);
-      alert('❌ Hata: ' + (error?.error || error?.message || 'Rezervasyon oluşturulamadı'));
+      console.error('  Hızlı rezervasyon hatası:', error);
+      alert('  Hata: ' + (error?.error || error?.message || 'Rezervasyon oluşturulamadı'));
     }
   };
 
@@ -154,13 +154,13 @@ export default function HomeScreen({ navigation }) {
     const getStatusColor = (durum) => {
       switch(durum?.toLowerCase()) {
         case 'planlanıyor':
-          return { bg: '#FFA726', text: '#fff', emoji: '⏳' }; // Sarı
+          return { bg: '#FFA726', text: '#fff', emoji: '  ' }; // Sarı
         case 'iptal edildi':
         case 'iptal':
-          return { bg: '#E53935', text: '#fff', emoji: '❌' }; // Kırmızı
+          return { bg: '#E53935', text: '#fff', emoji: ' ' }; // Kırmızı
         case 'tamamlandı':
         case 'tamamlanmış':
-          return { bg: '#78909C', text: '#fff', emoji: '✅' }; // Gri
+          return { bg: '#78909C', text: '#fff', emoji: ' ' }; // Gri
         case 'aktif':
         case 'devam ediyor':
           return { bg: '#66BB6A', text: '#fff', emoji: '🚗' }; // Yeşil
@@ -230,7 +230,7 @@ export default function HomeScreen({ navigation }) {
               />
               <Text style={styles.driverName} numberOfLines={1}>{surucu}</Text>
               {item.organizator?.guvenlikSkoru && (
-                <Text style={styles.ratingSmall}>⭐{item.organizator.guvenlikSkoru.toFixed(1)}</Text>
+                <Text style={styles.ratingSmall}>  {item.organizator.guvenlikSkoru.toFixed(1)}</Text>
               )}
             </View>
             <View style={styles.featuresCompact}>
