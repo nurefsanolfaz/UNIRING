@@ -1,7 +1,4 @@
--- ============================================
--- UNIRING - TEST VERİSİ: ÜNİVERSİTELER
--- ADIM 1/10
--- ============================================
+
 
 USE uniring_db;
 
@@ -39,10 +36,7 @@ INSERT INTO Universiteler (universiteAdi, emailDomain, sehir, logoURL) VALUES
 ('Çukurova Üniversitesi', 'cu.edu.tr', 'Adana', 'https://logos.uniring.com/cu.png'),
 ('Uludağ Üniversitesi', 'uludag.edu.tr', 'Bursa', 'https://logos.uniring.com/uludag.png');
 
--- ============================================
--- UNIRING - TEST VERİSİ: KULLANICILAR
--- ADIM 2/10 - 120 Kullanıcı
--- ============================================
+
 
 INSERT INTO Kullanicilar (universiteID, ad, soyad, email, emailDogrulandi, sifreHash, telefonNo, telefonDogrulandi, cinsiyet, dogumTarihi, profilFotoURL, biyografi, cinsiyetTercihi, sigaraIciyorMu, muzikTercihi, guvenlikSkoru, ogrenciBelgesiURL, ogrenciBelgesiOnaylandi, surusBelgesiNo, surusBelgesiOnaylandi, hesapDurumu) VALUES
 
@@ -184,13 +178,7 @@ INSERT INTO Kullanicilar (universiteID, ad, soyad, email, emailDogrulandi, sifre
 (20, 'Samet', 'Güler', 'samet.guler@gantep.edu.tr', TRUE, '2b$12LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lo4', '5561234595', TRUE, 'Erkek', '2003-09-22', 'https://i.pravatar.cc/150?img=71', 'Makine mühendisliği 1. sınıf.', 'Fark Etmez', FALSE, 'Rock', 86.50, 'https://docs.uniring.com/ogrenci_119.pdf', TRUE, 'U12345685', TRUE, 'Aktif'),
 (21, 'Ecem', 'Demir', 'ecem.demir@omu.edu.tr', TRUE, '2b$12LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lo5', '5561234596', TRUE, 'Kadın', '2001-12-04', 'https://i.pravatar.cc/150?img=77', 'Hemşirelik son sınıf öğrencisiyim.', 'Sadece Kadın', FALSE, 'Pop', 93.00, 'https://docs.uniring.com/ogrenci_120.pdf', TRUE, NULL, FALSE, 'Aktif');
 
--- ============================================
--- UNIRING - TEST VERİSİ: CUZDANLAR
--- ADIM 3/10 - Her kullanıcı için cüzdan
--- ============================================
 
--- Her kullanıcı için otomatik cüzdan oluştur
--- Bakiyeler 0 ile 1000 TL arasında rastgele
 INSERT INTO Cuzdanlar (kullaniciID, bakiye, sonGuncelleme) VALUES
 -- TOBB ETÜ (kullaniciID 1-15)
 (1, 450.00, '2025-11-28 14:30:00'),
@@ -330,13 +318,7 @@ INSERT INTO Cuzdanlar (kullaniciID, bakiye, sonGuncelleme) VALUES
 (119, 410.00, '2025-11-27 13:20:00'),
 (120, 730.80, '2025-11-30 10:40:00');
 
--- ============================================
--- UNIRING - TEST VERİSİ: ARACLAR
--- ADIM 4/10 - 40 Araç (Organizatörler için)
--- ============================================
 
--- Sadece surusBelgesiOnaylandi = TRUE olan kullanıcılara araç ekle
--- Gerçekçi marka, model, plaka, renk kombinasyonları
 
 INSERT INTO Araclar (sahipID, plaka, marka, model, renk, yil, yolcuKapasitesi, sigortaBitisTarihi, ruhsatFotoURL, onayDurumu, eklenmeTarihi) VALUES
 
@@ -394,15 +376,6 @@ INSERT INTO Araclar (sahipID, plaka, marka, model, renk, yil, yolcuKapasitesi, s
 (77, '34KLM567', 'Audi', 'Q3', 'Gri', 2021, 4, '2026-09-25', 'https://docs.uniring.com/ruhsat_39.pdf', 'Onaylandı', '2025-10-16 14:55:00'),
 (79, '34NOP890', 'Mercedes', 'GLA', 'Siyah', 2022, 4, '2026-11-10', 'https://docs.uniring.com/ruhsat_40.pdf', 'Onaylandı', '2025-11-03 12:20:00');
 
--- ============================================
--- UNIRING - TEST VERİSİ: SEFERLER
--- ADIM 5/10 - 60 Sefer (Tamamlanmış, Aktif, Planlanıyor)
--- ============================================
-
--- Sefer dağılımı:
--- 25 Tamamlanmış (geçmiş tarihler)
--- 20 Aktif/Planlanıyor (gelecek tarihler)
--- 15 İptal Edilmiş
 
 INSERT INTO Seferler (olusturanKullaniciID, aracID, seferTipi, katilimKapsami, seferTarihi, kalkisZamani, tahminiVarisZamani, maxKapasite, mevcutDoluluk, seferDurumu, bagajAlaniVar, klimaVar, aciklama, fiyatlandirmaTipi, temelFiyat, olusturulmaTarihi, iptalNedeni) VALUES
 
@@ -549,9 +522,7 @@ INSERT INTO Seferler (olusturanKullaniciID, aracID, seferTipi, katilimKapsami, s
 -- Sefer 45: İTÜ -> Beşiktaş (12 gün sonra)
 (67, 35, 'Araç Paylaşımı', 'Tüm Üniversiteler', '2025-12-13', '2025-12-13 17:00:00', '2025-12-13 17:40:00', 3, 0, 'Planlanıyor', TRUE, TRUE, 'Beşiktaş\'a gidiyorum.', 'Sabit', 55.00, '2025-12-01 16:00:00', NULL),
 
--- ============================================
--- İPTAL EDİLMİŞ SEFERLER (15 adet)
--- ============================================
+
 
 -- İptal 1: Hava kötü
 (2, 2, 'Araç Paylaşımı', 'Tüm Üniversiteler', '2025-10-16', '2025-10-16 16:00:00', '2025-10-16 16:45:00', 3, 0, 'İptal Edildi', TRUE, TRUE, 'Akşam Tunalıya gidecektim.', 'Sabit', 50.00, '2025-10-15 10:30:00', 'Hava çok kötü, iptal ediyorum.'),
@@ -599,13 +570,7 @@ INSERT INTO Seferler (olusturanKullaniciID, aracID, seferTipi, katilimKapsami, s
 (32, 18, 'Araç Paylaşımı', 'Tüm Üniversiteler', '2025-11-28', '2025-11-28 17:00:00', '2025-11-28 17:50:00', 3, 1, 'İptal Edildi', TRUE, TRUE, 'Çankaya yönü.', 'Sabit', 55.00, '2025-11-27 14:30:00', 'Yolda kaza olmuş, trafik çok kötü.');
 
 
--- ============================================
--- UNIRING - TEST VERİSİ: SEFER GÜZERGAH NOKTALARI
--- ADIM 6/10 - Her sefer için rota noktaları
--- ============================================
 
--- Her sefer için başlangıç, ara duraklar ve varış noktaları
--- Gerçekçi Ankara ve İstanbul konumları
 
 INSERT INTO SeferGuzergahNoktalari (seferID, konumAdi, latitude, longitude, siraNo, planlananVarisZamani, mesafeOncekiNoktaya) VALUES
 
@@ -772,9 +737,6 @@ INSERT INTO SeferGuzergahNoktalari (seferID, konumAdi, latitude, longitude, sira
 (25, 'İTÜ Ayazağa Kampüsü', 41.1063, 29.0228, 1, '16:00:00', NULL),
 (25, '1.Levent Metro', 41.0755, 29.0100, 2, '16:45:00', 7.8),
 
--- ============================================
--- AKTİF/PLANLANMIŞ SEFERLER (26-45)
--- ============================================
 
 -- SEFER 26: TOBB -> Kızılay (Yarın)
 (26, 'TOBB ETÜ Ana Kapı', 39.9210, 32.7975, 1, '17:00:00', NULL),
@@ -868,11 +830,7 @@ INSERT INTO SeferGuzergahNoktalari (seferID, konumAdi, latitude, longitude, sira
 (45, 'İTÜ Maçka Kampüsü', 41.0420, 28.9900, 1, '17:00:00', NULL),
 (45, 'Beşiktaş Meydanı', 41.0425, 29.0075, 2, '17:40:00', 4.2),
 
--- ============================================
--- İPTAL EDİLMİŞ SEFERLER İÇİN NOKTALAR (46-60)
--- ============================================
 
--- İptal edilmiş seferler için de rota noktaları (tutarlılık için)
 (46, 'TOBB ETÜ Ana Kapı', 39.9210, 32.7975, 1, '16:00:00', NULL),
 (46, 'Tunalı Hilmi Caddesi', 39.9050, 32.8600, 2, '16:45:00', 10.2),
 
@@ -919,21 +877,10 @@ INSERT INTO SeferGuzergahNoktalari (seferID, konumAdi, latitude, longitude, sira
 (60, 'Çankaya Belediyesi', 39.9115, 32.8634, 2, '17:50:00', 15.5);
 
 
--- ============================================
--- UNIRING - TEST VERİSİ: REZERVASYONLAR
--- ADIM 7/10 - Yolcu rezervasyonları
--- ============================================
-
--- Rezervasyon dağılımı:
--- 50 Tamamlanmış (geçmiş seferler için)
--- 20 Onaylandı (aktif seferler için)
--- 10 Beklemede, Reddedildi, İptal Edildi
 
 INSERT INTO Rezervasyonlar (seferID, yolcuID, binisNoktaID, inisNoktaID, yolcuSayisi, hesaplananUcret, indirimMiktari, odenecekTutar, durum, olusturulmaTarihi, onaylanmaTarihi, iptalNedeni, yolcuDegerlendirdiMi, organizatorDegerlendirdiMi) VALUES
 
--- ============================================
--- TAMAMLANMIŞ REZERVASYONLAR (50 adet)
--- ============================================
+
 
 -- Sefer 1 rezervasyonları (2 yolcu)
 (1, 3, 1, 2, 1, 50.00, 0.00, 50.00, 'Tamamlandı', '2025-10-14 12:00:00', '2025-10-14 13:30:00', NULL, TRUE, TRUE),
@@ -1087,16 +1034,6 @@ INSERT INTO Rezervasyonlar (seferID, yolcuID, binisNoktaID, inisNoktaID, yolcuSa
 (43, 61, 1, 2, 1, 60.00, 0.00, 60.00, 'İptal Edildi', '2025-12-01 10:00:00', '2025-12-01 11:00:00', 'Başka araç buldum, teşekkürler.', FALSE, FALSE);
 
 
--- ============================================
--- UNIRING - TEST VERİSİ: ÖDEMELER
--- ADIM 8/10 - Ödeme işlemleri
--- ============================================
-
--- Ödeme dağılımı:
--- 50 Ödendi (tamamlanmış rezervasyonlar)
--- 10 Ödenmedi (yeni onaylanmış rezervasyonlar)
--- Platform komisyonu: %10
-
 INSERT INTO Odemeler (rezervasyonID, seferID, borcluID, alacakliID, tutar, platformKomisyonu, netTutar, odemeTipi, odemeDurumu, islemTarihi, onayTarihi, faturaURL) VALUES
 
 -- ============================================
@@ -1205,9 +1142,6 @@ INSERT INTO Odemeler (rezervasyonID, seferID, borcluID, alacakliID, tutar, platf
 -- Sefer 25 ödemeleri
 (52, 25, 71, 69, 55.00, 5.50, 49.50, 'Cüzdan', 'Ödendi', '2025-11-26 16:00:00', '2025-11-26 16:00:00', 'https://invoices.uniring.com/inv_052.pdf'),
 
--- ============================================
--- ÖDENMEDİ (10 adet - Yeni onaylanmış rezervasyonlar)
--- ============================================
 
 -- Sefer 26 ödemeleri (Yarın - henüz ödenmedi)
 (53, 26, 3, 11, 50.00, 5.00, 45.00, 'Cüzdan', 'Ödenmedi', '2025-11-30 13:00:00', NULL, NULL),
@@ -1232,16 +1166,6 @@ INSERT INTO Odemeler (rezervasyonID, seferID, borcluID, alacakliID, tutar, platf
 -- Sefer 41 ödemeleri
 (61, 41, 3, 1, 55.00, 5.50, 49.50, 'Cüzdan', 'Ödenmedi', '2025-12-01 12:00:00', NULL, NULL);
 
-
--- ============================================
--- UNIRING - TEST VERİSİ: YORUMLAR
--- ADIM 9/10 - Kullanıcı değerlendirmeleri
--- ============================================
-
--- Yorum dağılımı:
--- 40 yorum (tamamlanmış rezervasyonlar için çift yönlü değerlendirmeler)
--- Yolcu → Organizatör yorumları
--- Organizatör → Yolcu yorumları
 
 INSERT INTO Yorumlar (rezervasyonID, degerlendirenKullaniciID, degerlendirilenKullaniciID, seferID, puan, yorum, kategoriler, yorumTarihi, gorunurluk) VALUES
 
@@ -1325,9 +1249,7 @@ INSERT INTO Yorumlar (rezervasyonID, degerlendirenKullaniciID, degerlendirilenKu
 -- Organizatör 75 → Yolcu 81
 (21, 75, 81, 10, 5, 'Koray çok sessiz ve saygılıydı, süper yolcu.', '{"saygi": 5, "zamaninda": 5}', '2025-11-07 19:30:00', 'Genel'),
 
--- ============================================
--- SEFER 14 YORUMLARI
--- ============================================
+
 -- Yolcu 9 → Organizatör 7
 (28, 9, 7, 14, 5, 'Burak abi çok güvenilir ve dakik, kesinlikle tavsiye ederim.', '{"zamaninda": 5, "guvenli_surus": 5, "iletisim": 5}', '2025-11-14 18:00:00', 'Genel'),
 -- Organizatör 7 → Yolcu 9
@@ -1373,15 +1295,7 @@ INSERT INTO Yorumlar (rezervasyonID, degerlendirenKullaniciID, degerlendirilenKu
 (46, 25, 29, 22, 5, 'Serkan çok kibar, bagajına yardım etti.', '{"saygi": 5, "zamaninda": 5}', '2025-11-23 17:15:00', 'Genel');
 
 
--- ============================================
--- UNIRING - TEST VERİSİ: MESAJLAR
--- ADIM 10/10 - Sefer bazlı mesajlaşma
--- ============================================
 
--- Mesaj dağılımı:
--- Tamamlanmış seferler için geçmiş mesajlar
--- Aktif seferler için güncel mesajlar
--- Organizatör ve yolcular arası iletişim
 
 INSERT INTO Mesajlar (seferID, gonderenID, mesajMetni, gonderimZamani, okunduMu, mesajTipi, dosyaURL) VALUES
 
