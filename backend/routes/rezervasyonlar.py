@@ -316,7 +316,48 @@ def iptal_rezervasyon(rezervasyon_id):
 
 
 # ============================================
-# 7. KULLANICININ TÜM REZERVASYONLARI
+# 7. KULLANICININ KENDI REZERVASYONLARI (/benim)
+# ============================================
+@bp.route('/benim', methods=['GET'])
+def get_my_rezervasyonlar():
+    """Giriş yapmış kullanıcının rezervasyonlarını getir"""
+    try:
+        # Token'dan veya header'dan kullanıcı ID'sini al
+        kullanici_id = request.headers.get('X-User-ID', type=int)
+        
+        if not kullanici_id:
+            return jsonify({'error': 'Kullanıcı kimliği bulunamadı'}), 401
+        
+        rezervasyonlar = Rezervasyonlar.query.filter_by(yolcuID=kullanici_id).order_by(
+            Rezervasyonlar.olusturulmaTarihi.desc()
+        ).all()
+        
+        # Sefer ve nokta bilgilerini de ekle
+        result = []
+        for rez in rezervasyonlar:
+            rez_dict = rez.to_dict()
+            sefer = Seferler.query.get(rez.seferID)
+            rez_dict['sefer'] = sefer.to_dict() if sefer else None
+            
+            # Biniş ve iniş noktalarını ekle
+            binis = SeferGuzergahNoktalari.query.get(rez.binisNoktaID)
+            inis = SeferGuzergahNoktalari.query.get(rez.inisNoktaID)
+            rez_dict['binisNokta'] = binis.to_dict() if binis else None
+            rez_dict['inisNokta'] = inis.to_dict() if inis else None
+            
+            result.append(rez_dict)
+        
+        return jsonify({
+            'rezervasyonlar': result,
+            'count': len(result)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================
+# 8. KULLANICININ TÜM REZERVASYONLARI (ID ile)
 # ============================================
 @bp.route('/kullanici/<int:kullanici_id>', methods=['GET'])
 def get_kullanici_rezervasyonlari(kullanici_id):
