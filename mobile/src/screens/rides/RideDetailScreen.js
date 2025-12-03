@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   Card, 
   Title, 
@@ -21,10 +22,13 @@ export default function RideDetailScreen({ route, navigation }) {
   const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
-    loadRideDetails();
+    loadRideDetails(true);
   }, [seferID]);
 
-  const loadRideDetails = async () => {
+  const loadRideDetails = async (showSpinner = false) => {
+    if (showSpinner) {
+      setLoading(true);
+    }
     try {
       const data = await getRideById(seferID);
       setSefer(data);
@@ -33,39 +37,66 @@ export default function RideDetailScreen({ route, navigation }) {
       Alert.alert('Hata', 'Sefer bilgileri yüklenemedi');
       navigation.goBack();
     } finally {
-      setLoading(false);
+      if (showSpinner) {
+        setLoading(false);
+      }
     }
   };
 
   const handleBooking = async (binisNoktaID, inisNoktaID) => {
-    Alert.alert(
-      'Rezervasyon Yap',
-      'Bu sefere katılmak istiyor musunuz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        { 
-          text: 'Evet', 
-          onPress: async () => {
-            try {
-              setBookingLoading(true);
-              await createBooking({
-                seferID,
-                binisNoktaID,
-                inisNoktaID,
-                yolcuSayisi: 1
-              });
-              Alert.alert('Başarılı', 'Rezervasyonunuz oluşturuldu!');
-              navigation.goBack();
-            } catch (error) {
-              console.error('Rezervasyon hatası:', error);
-              Alert.alert('Hata', error.message || 'Rezervasyon oluşturulamadı');
-            } finally {
-              setBookingLoading(false);
-            }
-          }
-        }
-      ]
-    );
+    console.log('🔵 Sefere Katıl butonuna basıldı', { seferID, binisNoktaID, inisNoktaID });
+    
+    try {
+      const storedUser = await AsyncStorage.getItem('userData');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+
+      console.log('👤 Kullanıcı bilgisi:', user);
+
+      if (!user?.kullaniciID) {
+        console.error('❌ Kullanıcı bilgisi bulunamadı');
+        alert('Hata: Kullanıcı bilgisine ulaşılamadı. Lütfen tekrar giriş yapın.');
+        return;
+      }
+
+      if (!binisNoktaID || !inisNoktaID) {
+        console.error('❌ Geçersiz güzergah noktaları');
+        alert('Hata: Geçerli bir güzergah bulunmadı. Lütfen daha sonra tekrar deneyin.');
+        return;
+      }
+
+      // Onay almak için confirm kullan (web-uyumlu)
+      const confirmed = window.confirm('Bu sefere katılmak istiyor musunuz?');
+      console.log('🔔 Kullanıcı onayı:', confirmed);
+      
+      if (!confirmed) {
+        console.log('❌ Kullanıcı iptal etti');
+        return;
+      }
+
+      console.log('⏳ Rezervasyon oluşturuluyor...');
+      setBookingLoading(true);
+      
+      const requestData = {
+        seferID,
+        yolcuID: user.kullaniciID,
+        binisNoktaID,
+        inisNoktaID,
+        yolcuSayisi: 1
+      };
+      console.log('📤 API isteği:', requestData);
+      
+      const response = await createBooking(requestData);
+      console.log('✅ API yanıtı:', response);
+      
+      await loadRideDetails(false);
+      alert('✅ Başarılı! Rezervasyonunuz oluşturuldu!');
+      
+    } catch (error) {
+      console.error('❌ Rezervasyon hatası:', error);
+      alert('❌ Hata: ' + (error?.error || error?.message || 'Rezervasyon oluşturulamadı'));
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -95,13 +126,42 @@ export default function RideDetailScreen({ route, navigation }) {
     );
   }
 
+  const guzergahList = Array.isArray(sefer.guzergah) && sefer.guzergah.length > 0
+    ? sefer.guzergah
+    : Array.isArray(sefer.guzergahNoktalari)
+      ? sefer.guzergahNoktalari
+      : [];
+
+  const baslangic = guzergahList.length > 0 ? guzergahList[0] : null;
+  const varis = guzergahList.length > 1 ? guzergahList[guzergahList.length - 1] : null;
   const bosKoltuk = sefer.maxKapasite - sefer.mevcutDoluluk;
   const surucu = sefer.organizator ? `${sefer.organizator.ad} ${sefer.organizator.soyad}` : 'Bilinmiyor';
-  const baslangic = sefer.guzergah && sefer.guzergah.length > 0 ? sefer.guzergah[0] : null;
-  const varis = sefer.guzergah && sefer.guzergah.length > 1 ? sefer.guzergah[sefer.guzergah.length - 1] : null;
+  const isJoinDisabled = bosKoltuk <= 0 || bookingLoading;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      {/* Üstte Sefere Katıl kartı */}
+      {bosKoltuk > 0 && sefer.seferDurumu === 'Aktif' && (
+        <Card style={[styles.card, styles.ctaCard]}>
+          <Card.Content style={styles.cardContent}>
+            <Title style={styles.ctaTitle}>Bu Seferde Yerini Ayır</Title>
+            <Paragraph style={styles.ctaSubtitle}>
+              {bosKoltuk} boş koltuk kaldı · kişi başı {sefer.temelFiyat} TL
+            </Paragraph>
+            <Button
+              mode="contained"
+              onPress={() => handleBooking(baslangic?.noktaID, varis?.noktaID)}
+              loading={bookingLoading}
+              disabled={bookingLoading}
+              style={styles.bookButton}
+              contentStyle={styles.bookButtonContent}
+            >
+              Sefere Katıl
+            </Button>
+          </Card.Content>
+        </Card>
+      )}
+
       {/* Sefer Tipi & Durum */}
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
@@ -109,10 +169,31 @@ export default function RideDetailScreen({ route, navigation }) {
             <Chip icon="car" mode="outlined" style={styles.chip}>
               {sefer.seferTipi}
             </Chip>
+            {bosKoltuk > 0 ? (
+              <Button
+                mode="outlined"
+                compact
+                onPress={() => handleBooking(baslangic?.noktaID, varis?.noktaID)}
+                loading={bookingLoading}
+                disabled={isJoinDisabled}
+                style={styles.inlineJoinButton}
+                contentStyle={styles.inlineJoinButtonContent}
+                labelStyle={styles.inlineJoinButtonLabel}
+              >
+                Sefere Katıl
+              </Button>
+            ) : (
+              <Chip icon="close" style={[styles.chip, styles.fullChip]}>
+                Dolu
+              </Chip>
+            )}
             <Chip 
               icon="information" 
               mode="outlined" 
-              style={[styles.chip, { backgroundColor: sefer.seferDurumu === 'Aktif' ? '#E8F5E9' : '#FFF3E0' }]}
+              style={[
+                styles.chip,
+                { backgroundColor: sefer.seferDurumu === 'Aktif' ? '#E8F5E9' : '#FFF3E0' }
+              ]}
             >
               {sefer.seferDurumu}
             </Chip>
@@ -127,16 +208,16 @@ export default function RideDetailScreen({ route, navigation }) {
           <Title>📍 Güzergah</Title>
           <Divider style={styles.divider} />
           
-          {sefer.guzergah && sefer.guzergah.length > 0 ? (
-            sefer.guzergah.map((nokta, index) => (
-              <View key={nokta.noktaID} style={styles.routePoint}>
+          {guzergahList.length > 0 ? (
+            guzergahList.map((nokta, index) => (
+              <View key={`${nokta.noktaID || index}-${nokta.konumAdi}`} style={styles.routePoint}>
                 <View style={styles.routeIndicator}>
                   <View style={[
                     styles.routeDot, 
                     index === 0 ? styles.startDot : 
-                    index === sefer.guzergah.length - 1 ? styles.endDot : styles.middleDot
+                    index === guzergahList.length - 1 ? styles.endDot : styles.middleDot
                   ]} />
-                  {index < sefer.guzergah.length - 1 && <View style={styles.routeLine} />}
+                  {index < guzergahList.length - 1 && <View style={styles.routeLine} />}
                 </View>
                 <View style={styles.routeInfo}>
                   <Text style={styles.routeTitle}>{nokta.konumAdi}</Text>
@@ -286,22 +367,6 @@ export default function RideDetailScreen({ route, navigation }) {
         </Card>
       )}
 
-      {/* Rezervasyon Butonu */}
-      {bosKoltuk > 0 && sefer.seferDurumu === 'Aktif' && (
-        <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            onPress={() => handleBooking(baslangic?.noktaID, varis?.noktaID)}
-            loading={bookingLoading}
-            disabled={bookingLoading}
-            style={styles.bookButton}
-            contentStyle={styles.bookButtonContent}
-          >
-            Rezervasyon Yap
-          </Button>
-        </View>
-      )}
-
       {bosKoltuk === 0 && (
         <View style={styles.buttonContainer}>
           <Text style={styles.fullText}>Bu sefer dolu</Text>
@@ -315,6 +380,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   centerContainer: {
     flex: 1,
@@ -337,10 +405,29 @@ const styles = StyleSheet.create({
   },
   chipContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginHorizontal: -4,
+    marginBottom: 4,
   },
   chip: {
-    marginRight: 5,
+    marginRight: 6,
+  },
+  inlineJoinButton: {
+    borderColor: COLORS.primary,
+    borderRadius: 18,
+  },
+  inlineJoinButtonContent: {
+    height: 36,
+    paddingHorizontal: 10,
+  },
+  inlineJoinButtonLabel: {
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  fullChip: {
+    backgroundColor: '#FFEBEE',
   },
   seferIdLabel: {
     marginTop: 12,
@@ -450,10 +537,11 @@ const styles = StyleSheet.create({
   featuresContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    marginHorizontal: -4,
   },
   featureChip: {
     marginVertical: 5,
+    marginHorizontal: 4,
   },
   driverContainer: {
     flexDirection: 'row',
@@ -486,6 +574,20 @@ const styles = StyleSheet.create({
   buttonContainer: {
     margin: 15,
     marginTop: 10,
+  },
+  ctaCard: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E3F2FD',
+  },
+  ctaTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  ctaSubtitle: {
+    color: COLORS.textSecondary,
+    marginBottom: 12,
   },
   bookButton: {
     backgroundColor: COLORS.primary,

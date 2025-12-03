@@ -15,9 +15,19 @@ def serialize_sefer(sefer):
     )
 
     sefer_dict = sefer.to_dict()
-    sefer_dict['guzergah'] = [nokta.to_dict() for nokta in guzergah]
+    guzergah_list = [nokta.to_dict() for nokta in guzergah]
+    sefer_dict['guzergah'] = guzergah_list
+    sefer_dict['guzergahNoktalari'] = guzergah_list
     sefer_dict['baslangicNoktasi'] = guzergah[0].konumAdi if guzergah else None
     sefer_dict['varisNoktasi'] = guzergah[-1].konumAdi if guzergah else None
+    sefer_dict['bosKoltuk'] = max(0, sefer.maxKapasite - (sefer.mevcutDoluluk or 0))
+
+    if sefer.organizator:
+        sefer_dict['organizator'] = sefer.organizator.to_dict()
+
+    if sefer.arac:
+        sefer_dict['arac'] = sefer.arac.to_dict()
+
     return sefer_dict
 
 @bp.route('', methods=['GET'])
@@ -154,12 +164,7 @@ def get_sefer(sefer_id):
     """Sefer detaylarını getir"""
     try:
         sefer = Seferler.query.get_or_404(sefer_id)
-        guzergah = SeferGuzergahNoktalari.query.filter_by(seferID=sefer_id).order_by(SeferGuzergahNoktalari.siraNo).all()
-        
-        sefer_dict = sefer.to_dict()
-        sefer_dict['guzergahNoktalari'] = [nokta.to_dict() for nokta in guzergah]
-        
-        return jsonify(sefer_dict), 200
+        return jsonify(serialize_sefer(sefer)), 200
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
