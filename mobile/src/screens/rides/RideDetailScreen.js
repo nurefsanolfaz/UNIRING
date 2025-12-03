@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   seferIdLabel: {
     marginTop: 12,
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: '#424242',
   },
   seferIdValue: {
     fontWeight: 'bold',
@@ -481,23 +481,24 @@ const styles = StyleSheet.create({
   },
   routeTime: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: '#424242',
   },
   routeDistance: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: '#424242',
   },
   noData: {
     fontStyle: 'italic',
-    color: COLORS.textSecondary,
+    color: '#616161',
   },
   infoText: {
     marginVertical: 4,
     fontSize: 14,
+    color: '#212121',
   },
   label: {
     fontWeight: 'bold',
-    color: COLORS.text,
+    color: '#000000',
   },
   infoRow: {
     flexDirection: 'row',
@@ -509,7 +510,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: '#424242',
     marginBottom: 5,
   },
   infoValue: {
@@ -526,7 +527,7 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: '#424242',
     marginBottom: 5,
   },
   priceValue: {
@@ -563,13 +564,13 @@ const styles = StyleSheet.create({
   },
   driverUniversity: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: '#424242',
     marginTop: 4,
   },
   bio: {
     marginTop: 10,
     fontStyle: 'italic',
-    color: COLORS.textSecondary,
+    color: '#424242',
   },
   buttonContainer: {
     margin: 15,
@@ -586,7 +587,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   ctaSubtitle: {
-    color: COLORS.textSecondary,
+    color: '#424242',
     marginBottom: 12,
   },
   bookButton: {

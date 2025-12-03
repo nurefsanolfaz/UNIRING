@@ -6,6 +6,7 @@ import HomeScreen from '../screens/rides/HomeScreen';
 import CreateRideScreen from '../screens/rides/CreateRideScreen';
 import RideDetailScreen from '../screens/rides/RideDetailScreen';
 import MyRidesScreen from '../screens/rides/MyRidesScreen';
+import MyBookingsScreen from '../screens/rides/MyBookingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MyVehiclesScreen from '../screens/vehicles/MyVehiclesScreen';
 import AddVehicleScreen from '../screens/vehicles/AddVehicleScreen';
@@ -101,6 +102,11 @@ function ProfileStack() {
         options={{ title: 'Profil' }}
       />
       <Stack.Screen 
+        name="MyBookings" 
+        component={MyBookingsScreen}
+        options={{ title: 'Rezervasyonlarım' }}
+      />
+      <Stack.Screen 
         name="MyVehicles" 
         component={MyVehiclesScreen}
         options={{ title: 'Araçlarım' }}
@@ -114,6 +120,11 @@ function ProfileStack() {
         name="EditVehicle" 
         component={EditVehicleScreen}
         options={{ title: 'Araç Düzenle' }}
+      />
+      <Stack.Screen 
+        name="RideDetail" 
+        component={RideDetailScreen}
+        options={{ title: 'Sefer Detayı' }}
       />
     </Stack.Navigator>
   );

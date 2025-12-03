@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Button, Avatar, Card, List, Divider } from 'react-native-paper';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,8 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 export default function ProfileScreen({ navigation }) {
   const { user, logout } = useAuth();
+  const [accountInfoExpanded, setAccountInfoExpanded] = useState(false);
+  const [statsExpanded, setStatsExpanded] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -23,85 +25,108 @@ export default function ProfileScreen({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        {/* Profil Başlığı */}
+        {/* Kompakt Profil Başlığı */}
         <View style={styles.header}>
           <Avatar.Text 
-            size={100} 
+            size={60} 
             label={getInitials()}
             style={styles.avatar}
             color="#FFFFFF"
           />
-          <Text style={styles.name}>
-            {user?.first_name || user?.ad || 'Kullanıcı'} {user?.last_name || user?.soyad || ''}
-          </Text>
-          <Text style={styles.subtitle}>
-            {user?.email || 'E-posta belirtilmemiş'}
-          </Text>
+          <View style={styles.userInfo}>
+            <Text style={styles.name}>
+              {user?.first_name || user?.ad || 'Kullanıcı'} {user?.last_name || user?.soyad || ''}
+            </Text>
+            <Text style={styles.subtitle}>
+              {user?.email || 'E-posta belirtilmemiş'}
+            </Text>
+          </View>
         </View>
 
-        {/* Hesap Bilgileri Kartı */}
-        <Card mode="contained" style={[styles.card, styles.infoCard]}>
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Hesap Bilgileri</Text>
-            <Divider style={styles.divider} />
-            
-            <View style={styles.infoRow}>
-              <Icon name="phone" size={20} color={COLORS.primary} />
-              <View style={styles.infoText}>
-                <Text style={styles.infoLabel}>Telefon</Text>
-                <Text style={styles.infoValue}>
-                  {user?.phone_number || user?.telefon || 'Belirtilmemiş'}
-                </Text>
+        {/* Hesap Bilgileri - Açılır Menü */}
+        <Card mode="contained" style={styles.card}>
+          <List.Accordion
+            title="Hesap Bilgileri"
+            titleStyle={styles.accordionTitle}
+            left={props => <Icon name="account-details" size={24} color={COLORS.primary} />}
+            expanded={accountInfoExpanded}
+            onPress={() => setAccountInfoExpanded(!accountInfoExpanded)}
+            style={styles.accordion}
+          >
+            <View style={styles.accordionContent}>
+              <View style={styles.infoRow}>
+                <Icon name="phone" size={20} color={COLORS.primary} />
+                <View style={styles.infoText}>
+                  <Text style={styles.infoLabel}>Telefon</Text>
+                  <Text style={styles.infoValue}>
+                    {user?.phone_number || user?.telefon || 'Belirtilmemiş'}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.infoRow}>
-              <Icon name="school" size={20} color={COLORS.primary} />
-              <View style={styles.infoText}>
-                <Text style={styles.infoLabel}>Üniversite ID</Text>
-                <Text style={styles.infoValue}>
-                  {user?.universitID || user?.universite_id || 'Belirtilmemiş'}
-                </Text>
+              <View style={styles.infoRow}>
+                <Icon name="school" size={20} color={COLORS.primary} />
+                <View style={styles.infoText}>
+                  <Text style={styles.infoLabel}>Üniversite ID</Text>
+                  <Text style={styles.infoValue}>
+                    {user?.universitID || user?.universite_id || 'Belirtilmemiş'}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.infoRow}>
-              <Icon name="shield-check" size={20} color={COLORS.primary} />
-              <View style={styles.infoText}>
-                <Text style={styles.infoLabel}>Güvenlik Skoru</Text>
-                <Text style={styles.infoValue}>
-                  {user?.guvenlikSkoru || user?.guvenlik_skoru || '100'} / 100
-                </Text>
+              <View style={styles.infoRow}>
+                <Icon name="shield-check" size={20} color={COLORS.primary} />
+                <View style={styles.infoText}>
+                  <Text style={styles.infoLabel}>Güvenlik Skoru</Text>
+                  <Text style={styles.infoValue}>
+                    {user?.guvenlikSkoru || user?.guvenlik_skoru || '100'} / 100
+                  </Text>
+                </View>
               </View>
             </View>
-          </Card.Content>
+          </List.Accordion>
         </Card>
 
-        {/* İstatistikler */}
-        <Card mode="contained" style={[styles.card, styles.statsCard]}>
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.cardTitle}>İstatistikler</Text>
-            <Divider style={styles.divider} />
-            <View style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <Text style={styles.statValue}>0</Text>
-                <Text style={styles.statLabel}>Yolculuk</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statValue}>0</Text>
-                <Text style={styles.statLabel}>Rezervasyon</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statValue}>0</Text>
-                <Text style={styles.statLabel}>Değerlendirme</Text>
+        {/* İstatistikler - Açılır Menü */}
+        <Card mode="contained" style={styles.card}>
+          <List.Accordion
+            title="İstatistikler"
+            titleStyle={styles.accordionTitle}
+            left={props => <Icon name="chart-bar" size={24} color={COLORS.primary} />}
+            expanded={statsExpanded}
+            onPress={() => setStatsExpanded(!statsExpanded)}
+            style={styles.accordion}
+          >
+            <View style={styles.accordionContent}>
+              <View style={styles.statsRow}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>0</Text>
+                  <Text style={styles.statLabel}>Yolculuk</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>0</Text>
+                  <Text style={styles.statLabel}>Rezervasyon</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>0</Text>
+                  <Text style={styles.statLabel}>Değerlendirme</Text>
+                </View>
               </View>
             </View>
-          </Card.Content>
+          </List.Accordion>
         </Card>
 
         {/* Menü */}
         <Card mode="contained" style={[styles.card, styles.menuCard]}>
           <Card.Content style={styles.cardContent}>
+            <List.Item
+              title="Rezervasyonlarım"
+              titleStyle={styles.menuItemTitle}
+              left={() => <Icon name="ticket-confirmation" size={24} color={COLORS.primary} />}
+              right={() => <Icon name="chevron-right" size={24} color={COLORS.textSecondary} />}
+              onPress={() => navigation.navigate('MyBookings')}
+            />
+            <Divider />
             <List.Item
               title="Araçlarım"
               titleStyle={styles.menuItemTitle}
@@ -157,104 +182,113 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F9FC',
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 120,
+    paddingTop: 12,
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    paddingVertical: 20,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: '#1E88E5',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   avatar: {
     backgroundColor: COLORS.primary,
-    marginBottom: 16,
+  },
+  userInfo: {
+    marginLeft: 16,
+    flex: 1,
   },
   name: {
     ...FONTS.bold,
-    fontSize: 24,
+    fontSize: 18,
     color: COLORS.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   subtitle: {
     ...FONTS.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textSecondary,
   },
   card: {
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E3F2FD',
     backgroundColor: '#FFFFFF',
     shadowColor: '#1E88E5',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 3,
+    overflow: 'hidden',
   },
-  infoCard: {
-    paddingTop: 4,
-  },
-  statsCard: {
+  accordion: {
     backgroundColor: '#FFFFFF',
+    paddingVertical: 4,
   },
-  menuCard: {
-    backgroundColor: '#FFFFFF',
-  },
-  cardContent: {
-    paddingVertical: 8,
-  },
-  cardTitle: {
+  accordionTitle: {
     ...FONTS.semiBold,
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.text,
-    marginBottom: 8,
   },
-  divider: {
-    marginBottom: 16,
+  accordionContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#F9FAFB',
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
   infoText: {
-    marginLeft: 16,
+    marginLeft: 12,
     flex: 1,
   },
   infoLabel: {
     fontSize: 12,
     color: COLORS.textSecondary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   infoValue: {
     ...FONTS.medium,
-    fontSize: 15,
+    fontSize: 14,
     color: COLORS.text,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
   statBox: {
     alignItems: 'center',
-    backgroundColor: '#F5F9FC',
-    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    minWidth: 90,
+    minWidth: 85,
+    borderWidth: 1,
+    borderColor: '#E3F2FD',
   },
   statValue: {
     ...FONTS.bold,
-    fontSize: 28,
+    fontSize: 24,
     color: COLORS.primary,
   },
   statLabel: {
     ...FONTS.regular,
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textSecondary,
     marginTop: 4,
+  },
+  menuCard: {
+    backgroundColor: '#FFFFFF',
   },
   menuItemTitle: {
     ...FONTS.medium,
