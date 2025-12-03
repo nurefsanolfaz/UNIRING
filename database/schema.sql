@@ -1,8 +1,6 @@
--- ============================================
 -- UNIRING - University Carpooling Platform
 -- Database Schema (10 Core Tables)
 -- BIL372 Database Systems Project
--- ============================================
 
 -- Drop tables if exists (reverse order due to foreign keys)
 
@@ -21,9 +19,7 @@ DROP TABLE IF EXISTS Araclar;
 DROP TABLE IF EXISTS Kullanicilar;
 DROP TABLE IF EXISTS Universiteler;
 
--- ============================================
 -- TABLO 1: Universiteler
--- ============================================
 CREATE TABLE Universiteler (
     universiteID INT PRIMARY KEY AUTO_INCREMENT,
     universiteAdi VARCHAR(150) NOT NULL,
@@ -34,9 +30,7 @@ CREATE TABLE Universiteler (
     INDEX idx_sehir (sehir)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 2: Kullanicilar
--- ============================================
 CREATE TABLE Kullanicilar (
     kullaniciID INT PRIMARY KEY AUTO_INCREMENT,
     universiteID INT NOT NULL,
@@ -69,9 +63,7 @@ CREATE TABLE Kullanicilar (
     INDEX idx_hesap_durumu (hesapDurumu)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 3: Araclar
--- ============================================
 CREATE TABLE Araclar (
     aracID INT PRIMARY KEY AUTO_INCREMENT,
     sahipID INT NOT NULL,
@@ -91,9 +83,7 @@ CREATE TABLE Araclar (
     INDEX idx_onay_durumu (onayDurumu)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 4: Seferler
--- ============================================
 CREATE TABLE Seferler (
     seferID INT PRIMARY KEY AUTO_INCREMENT,
     olusturanKullaniciID INT NOT NULL,
@@ -123,9 +113,7 @@ CREATE TABLE Seferler (
     INDEX idx_sefer_tipi (seferTipi)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 5: SeferGuzergahNoktalari
--- ============================================
 CREATE TABLE SeferGuzergahNoktalari (
     noktaID INT PRIMARY KEY AUTO_INCREMENT,
     seferID INT NOT NULL,
@@ -142,9 +130,7 @@ CREATE TABLE SeferGuzergahNoktalari (
     INDEX idx_konum (konumAdi)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 6: Rezervasyonlar
--- ============================================
 CREATE TABLE Rezervasyonlar (
     rezervasyonID INT PRIMARY KEY AUTO_INCREMENT,
     seferID INT NOT NULL,
@@ -171,9 +157,7 @@ CREATE TABLE Rezervasyonlar (
     INDEX idx_tarih (olusturulmaTarihi)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 7: Cuzdanlar
--- ============================================
 CREATE TABLE Cuzdanlar (
     cuzdanID INT PRIMARY KEY AUTO_INCREMENT,
     kullaniciID INT NOT NULL UNIQUE,
@@ -183,9 +167,7 @@ CREATE TABLE Cuzdanlar (
     INDEX idx_kullanici (kullaniciID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 8: Odemeler
--- ============================================
 CREATE TABLE Odemeler (
     odemeID INT PRIMARY KEY AUTO_INCREMENT,
     rezervasyonID INT,
@@ -212,9 +194,7 @@ CREATE TABLE Odemeler (
     INDEX idx_tarih (islemTarihi)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 9: Yorumlar
--- ============================================
 CREATE TABLE Yorumlar (
     yorumID INT PRIMARY KEY AUTO_INCREMENT,
     rezervasyonID INT NOT NULL,
@@ -236,9 +216,7 @@ CREATE TABLE Yorumlar (
     INDEX idx_tarih (yorumTarihi)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- TABLO 10: Mesajlar
--- ============================================
 CREATE TABLE Mesajlar (
     mesajID INT PRIMARY KEY AUTO_INCREMENT,
     seferID INT NOT NULL,
@@ -256,6 +234,4 @@ CREATE TABLE Mesajlar (
     INDEX idx_okundu (okunduMu)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- END OF SCHEMA
--- ============================================

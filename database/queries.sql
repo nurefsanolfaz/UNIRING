@@ -1,13 +1,8 @@
--- ============================================
 -- UNIRING - Non-Trivial SQL Queries
--- Complex queries for demo and analysis
--- ============================================
 
--- ============================================
 -- QUERY 1: En Popüler Organizatörler
 -- Tamamlanmış sefer düzenleyen kullanıcılar
 -- JOIN, GROUP BY, HAVING, Subquery kullanımı
--- ============================================
 SELECT
     k.kullaniciID,
     CONCAT(k.ad, ' ', k.soyad) AS organizatorAdi,
@@ -32,11 +27,9 @@ HAVING toplamSeferSayisi >= 1  -- En az 1 tamamlanmış sefer
 ORDER BY tamamlananSeferSayisi DESC, ortalamaYolcuPuani DESC, toplamKazanc DESC
 LIMIT 10;
 
--- ============================================
 -- QUERY 2: Üniversiteler Arası Sefer Analizi
 -- Popüler güzergahlar analizi
 -- SELF JOIN, Multiple JOINs, Aggregate Functions
--- ============================================
 SELECT 
     uni1.universiteAdi AS organizatorUniversitesi,
     uni1.sehir AS organizatorSehir,
@@ -61,11 +54,9 @@ HAVING seferSayisi >= 1
 ORDER BY seferSayisi DESC, rezervasyonSayisi DESC
 LIMIT 20;
 
--- ============================================
 -- QUERY 3: Zaman Bazlı Talep Analizi
 -- Hangi gün ve saatlerde en çok sefer var?
 -- Window Functions, CASE statements, Date/Time functions
--- ============================================
 SELECT 
     DAYNAME(s.seferTarihi) AS gun,
     HOUR(s.kalkisZamani) AS saat,
@@ -83,10 +74,8 @@ HAVING seferSayisi >= 1
 ORDER BY seferSayisi DESC, saat ASC
 LIMIT 20;
 
--- ============================================
 -- QUERY 4: Gelir ve Kazanç Analizi (Correlated Subquery)
 -- Kullanıcıların gelir performansını karşılaştır
--- ============================================
 SELECT 
     k.kullaniciID,
     CONCAT(k.ad, ' ', k.soyad) AS kullaniciAdi,
@@ -130,11 +119,9 @@ WHERE k.hesapDurumu = 'Aktif'
 ORDER BY toplamKazanc DESC
 LIMIT 15;
 
--- ============================================
 -- QUERY 5: Rezervasyon Onaylama Performansı
 -- Organizatörlerin rezervasyonları ne kadar hızlı onayladığı
 -- DATEDIFF, AVG, Complex JOIN
--- ============================================
 SELECT 
     k.kullaniciID,
     CONCAT(k.ad, ' ', k.soyad) AS organizatorAdi,
@@ -158,11 +145,9 @@ HAVING toplamRezervasyonTalebi >= 2
 ORDER BY onaylamaYuzdesi DESC, ortalamaOnaylamaSuresiDakika ASC
 LIMIT 20;
 
--- ============================================
 -- QUERY 6: Çapraz Satış Fırsatları (Cross-Selling)
 -- Hangi kullanıcılar hem organizatör hem yolcu?
 -- UNION, Multiple aggregates
--- ============================================
 SELECT 
     k.kullaniciID,
     CONCAT(k.ad, ' ', k.soyad) AS kullaniciAdi,
@@ -196,11 +181,9 @@ HAVING organizatorOlarakSeferSayisi > 0
 ORDER BY toplamAktivite DESC
 LIMIT 25;
 
--- ============================================
 -- QUERY 7: Güzergah Optimizasyon Analizi
 -- Çok duraklı seferler analizi
 -- Complex aggregation, Multiple JOINs
--- ============================================
 SELECT 
     s.seferID,
     CONCAT(k.ad, ' ', k.soyad) AS organizatorAdi,
@@ -226,11 +209,9 @@ HAVING toplamDurakSayisi >= 3
 ORDER BY toplamMesafeKm DESC, rezervasyonSayisi DESC
 LIMIT 15;
 
--- ============================================
--- QUERY 8: Güvenlik Skoru Korelasyon Analizi
+-- QUERY 8: Güvenlik Skoru Analizi
 -- Güvenlik skoru ile diğer metrikler arasındaki ilişki
 -- Statistical analysis, CASE WHEN, Window functions
--- ============================================
 SELECT 
     CASE 
         WHEN k.guvenlikSkoru >= 80 THEN 'Çok Yüksek (80+)'
@@ -285,11 +266,9 @@ WHERE k.hesapDurumu = 'Aktif'
 GROUP BY guvenlikSeviyesi
 ORDER BY AVG(k.guvenlikSkoru) DESC;
 
--- ============================================
 -- QUERY 9: Zaman Serisi Trend Analizi
 -- Aylık büyüme ve trend analizi
 -- Window functions, LAG, Growth calculation
--- ============================================
 WITH AylikIstatistikler AS (
     SELECT 
         DATE_FORMAT(s.olusturulmaTarihi, '%Y-%m') AS donem,
@@ -322,11 +301,9 @@ SELECT
 FROM AylikIstatistikler
 ORDER BY donem DESC;
 
--- ============================================
--- QUERY 10: En Değerli Müşteriler (RFM Analizi)
+-- QUERY 10: En Değerli Müşteriler
 -- Recency, Frequency, Monetary analizi
 -- Complex scoring, Multiple CTEs
--- ============================================
 WITH KullaniciMetrikleri AS (
     SELECT 
         k.kullaniciID,
@@ -393,6 +370,4 @@ WHERE toplamIslemSayisi > 0
 ORDER BY toplamRFMSkoru DESC, toplamIslemDegeri DESC
 LIMIT 50;
 
--- ============================================
 -- END OF QUERIES
--- ============================================

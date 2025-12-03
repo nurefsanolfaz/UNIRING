@@ -1,12 +1,8 @@
--- ============================================
 -- UNIRING - Database Views
--- 5+ Complex Views for Reporting and Analysis
--- ============================================
+-- 6 Complex Views
 
--- ============================================
 -- VIEW 1: Aktif Seferler Özeti
 -- Aktif ve planlanmış tüm seferlerin detaylı bilgilerini gösterir
--- ============================================
 CREATE OR REPLACE VIEW AktifSeferlerView AS
 SELECT 
     s.seferID,
@@ -41,10 +37,8 @@ LEFT JOIN Araclar a ON s.aracID = a.aracID
 WHERE s.seferDurumu IN ('Planlanıyor', 'Aktif')
 ORDER BY s.kalkisZamani ASC;
 
--- ============================================
 -- VIEW 2: Kullanıcı İstatistikleri
 -- Her kullanıcının detaylı aktivite istatistiklerini gösterir
--- ============================================
 CREATE OR REPLACE VIEW KullaniciIstatistikleriView AS
 SELECT 
     k.kullaniciID,
@@ -78,10 +72,8 @@ LEFT JOIN Odemeler o ON k.kullaniciID = o.alacakliID OR k.kullaniciID = o.borclu
 LEFT JOIN Yorumlar y ON k.kullaniciID = y.degerlendirilenKullaniciID
 GROUP BY k.kullaniciID;
 
--- ============================================
 -- VIEW 3: Popüler Güzergahlar
 -- En çok kullanılan güzergahları gösterir
--- ============================================
 CREATE OR REPLACE VIEW PopulerGuzergahlarView AS
 SELECT 
     kalkis.konumAdi AS kalkisNoktasi,
@@ -102,10 +94,8 @@ GROUP BY kalkis.konumAdi, varis.konumAdi
 HAVING seferSayisi >= 2
 ORDER BY seferSayisi DESC, rezervasyonSayisi DESC;
 
--- ============================================
 -- VIEW 4: Finansal Özet Raporu
 -- Platform genelindeki finansal durumu gösterir
--- ============================================
 CREATE OR REPLACE VIEW FinansalOzetView AS
 SELECT 
     DATE_FORMAT(o.islemTarihi, '%Y-%m') AS donem,
@@ -123,10 +113,8 @@ WHERE o.islemTarihi >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH)
 GROUP BY DATE_FORMAT(o.islemTarihi, '%Y-%m')
 ORDER BY donem DESC;
 
--- ============================================
 -- VIEW 5: Güvenlik ve Değerlendirme Raporu
 -- Kullanıcıların güvenlik skorları ve değerlendirmelerini analiz eder
--- ============================================
 CREATE OR REPLACE VIEW GuvenlikDegerlendirmeView AS
 SELECT 
     k.kullaniciID,
@@ -167,10 +155,8 @@ LEFT JOIN Rezervasyonlar r ON k.kullaniciID = r.yolcuID
 GROUP BY k.kullaniciID
 ORDER BY sistemGuvenlikSkoru DESC, ortalamaDegerlendirmePuani DESC;
 
--- ============================================
 -- VIEW 6: Sefer Detay Raporu
 -- Her sefer için detaylı bilgi ve istatistikler
--- ============================================
 CREATE OR REPLACE VIEW SeferDetayRaporuView AS
 SELECT 
     s.seferID,
@@ -209,6 +195,4 @@ LEFT JOIN Mesajlar m ON s.seferID = m.seferID
 GROUP BY s.seferID
 ORDER BY s.olusturulmaTarihi DESC;
 
--- ============================================
 -- END OF VIEWS
--- ============================================
