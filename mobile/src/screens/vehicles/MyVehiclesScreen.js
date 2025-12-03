@@ -41,7 +41,7 @@ export default function MyVehiclesScreen({ navigation }) {
     } catch (error) {
       console.error('Araç yükleme hatası:', error);
       Alert.alert(
-        '⚠️ Uyarı', 
+        'Uyarı', 
         'Araçlar yüklenirken bir hata oluştu',
         [{ text: 'Tamam' }]
       );
@@ -73,7 +73,7 @@ export default function MyVehiclesScreen({ navigation }) {
               const response = await vehicleService.deleteVehicle(vehicleId);
               if (response.success) {
                 Alert.alert(
-                  '✅ Başarılı', 
+                  ' Başarılı', 
                   'Araç başarıyla silindi',
                   [{ text: 'Tamam' }]
                 );
@@ -81,7 +81,7 @@ export default function MyVehiclesScreen({ navigation }) {
               }
             } catch (error) {
               Alert.alert(
-                '❌ Hata', 
+                ' Hata', 
                 error.response?.data?.message || 'Araç silinemedi. Lütfen tekrar deneyin.',
                 [{ text: 'Tamam', style: 'cancel' }]
               );

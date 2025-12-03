@@ -1,14 +1,5 @@
 import api from './api';
 
-// ============================================
-// Sefer (Ride) İşlemleri - Database Schema'ya Uyumlu
-// Backend API Endpoints (Arkadaşın yapıyor):
-// GET /api/seferler - Tüm aktif seferler
-// GET /api/seferler/:id - Tek sefer detayı
-// POST /api/seferler - Yeni sefer oluştur
-// GET /api/seferler/benim - Kullanıcının oluşturduğu seferler
-// ============================================
-
 // Tüm Aktif Seferleri Listele
 export const getAllRides = async () => {
   try {
@@ -49,13 +40,7 @@ export const getMyCreatedRides = async () => {
   }
 };
 
-// ============================================
-// Rezervasyon (Booking) İşlemleri
-// Backend API Endpoints:
-// POST /api/rezervasyonlar - Yeni rezervasyon
-// GET /api/rezervasyonlar/benim - Kullanıcının rezervasyonları
-// PUT /api/rezervasyonlar/:id/iptal - Rezervasyon iptali
-// ============================================
+
 
 // Rezervasyon Oluştur
 export const createBooking = async (rezervasyonData) => {
@@ -99,11 +84,6 @@ export const cancelBooking = async (rezervasyonID, iptalNedeni) => {
   }
 };
 
-// ============================================
-// Sefer Arama & Filtreleme
-// Backend API Endpoint:
-// POST /api/seferler/ara - Sefer arama
-// ============================================
 
 // Sefer Ara
 export const searchRides = async (aramaKriterleri) => {
