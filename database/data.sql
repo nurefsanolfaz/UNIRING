@@ -3,6 +3,8 @@
 -- ADIM 1/10
 -- ============================================
 
+USE uniring_db;
+
 INSERT INTO Universiteler (universiteAdi, emailDomain, sehir, logoURL) VALUES
 -- Ankara (6)
 ('TOBB Ekonomi ve Teknoloji Üniversitesi', 'etu.edu.tr', 'Ankara', 'https://logos.uniring.com/etu.png'),

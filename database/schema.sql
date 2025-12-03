@@ -5,6 +5,10 @@
 -- ============================================
 
 -- Drop tables if exists (reverse order due to foreign keys)
+
+USE uniring;
+
+
 DROP TABLE IF EXISTS Mesajlar;
 DROP TABLE IF EXISTS Yorumlar;
 DROP TABLE IF EXISTS Odemeler;
@@ -41,7 +45,7 @@ CREATE TABLE Kullanicilar (
     email VARCHAR(100) NOT NULL UNIQUE,
     emailDogrulandi BOOLEAN DEFAULT FALSE,
     sifreHash VARCHAR(255) NOT NULL,
-    telefonNo VARCHAR(15),
+    telefonNo VARCHAR(15),  
     telefonDogrulandi BOOLEAN DEFAULT FALSE,
     cinsiyet ENUM('Erkek', 'Kadın', 'Belirtmek İstemiyorum') NOT NULL,
     dogumTarihi DATE NOT NULL,

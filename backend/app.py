@@ -49,6 +49,23 @@ def index():
         'status': 'healthy'
     })
 
+# Database test endpoint
+@app.route('/test/db')
+def test_db():
+    try:
+        from models import Universiteler
+        universities = Universiteler.query.all()
+        return jsonify({
+            'status': 'connected',
+            'university_count': len(universities),
+            'universities': [{'id': u.universiteID, 'name': u.universiteAdi, 'domain': u.emailDomain} for u in universities[:5]]
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
