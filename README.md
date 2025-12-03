@@ -1,14 +1,13 @@
 # UNIRING - Üniversiteler Arası Akıllı Carpooling Platformu
 
-**BIL372 Veritabanı Sistemleri Dersi Projesi**  
-TOBB Ekonomi ve Teknoloji Üniversitesi  
+**BIL372 Veritabanı Sistemleri Dersi Projesi**
+TOBB Ekonomi ve Teknoloji Üniversitesi
 Bilgisayar Mühendisliği Bölümü
 
 ## 📋 Proje Bilgileri
 
-**Proje Adı:** UNIRING  
-**Teslim Tarihi:** 3 Aralık 2025  
-**Grup Üyeleri:**
+**Proje Adı:** UNIRING**Teslim Tarihi:** 3 Aralık 2025**Grup Üyeleri:**
+
 - Nurefşan Olfaz (2113010008)
 - Mehmet Alp Almacı (211401023)
 
@@ -18,7 +17,7 @@ UNIRING, Türkiye'deki üniversite öğrencilerine yönelik güvenlik ve esnekli
 
 ## 🏗️ Mimari
 
-- **Frontend:** React (PWA - Progressive Web App)
+- **Mobile Frontend:** React Native + Expo
 - **Backend:** Flask + SQLAlchemy
 - **Database:** MySQL
 - **API:** RESTful JSON API
@@ -26,6 +25,7 @@ UNIRING, Türkiye'deki üniversite öğrencilerine yönelik güvenlik ve esnekli
 ## 📊 Veritabanı Tasarımı
 
 ### Tablolar (10 Core Tables)
+
 1. **Universiteler** - Üniversite bilgileri
 2. **Kullanicilar** - Kullanıcı profilleri ve kimlik doğrulama
 3. **Araclar** - Kayıtlı araçlar
@@ -38,6 +38,7 @@ UNIRING, Türkiye'deki üniversite öğrencilerine yönelik güvenlik ve esnekli
 10. **Mesajlar** - Sefer bazlı mesajlaşma
 
 ### Öne Çıkan Özellikler
+
 - ✅ 3NF normalizasyon
 - ✅ 15+ performans indeksi
 - ✅ 6 karmaşık VIEW
@@ -46,69 +47,111 @@ UNIRING, Türkiye'deki üniversite öğrencilerine yönelik güvenlik ve esnekli
 
 ## 🚀 Kurulum
 
+### Gereksinimler
+
+- Python 3.8+
+- Node.js 16+
+- MySQL 8.0+
+- Expo CLI (mobile için)
+
 ### Backend Setup
 
-```bash
-# Virtual environment oluştur
+# Backend klasörüne git
+
 cd backend
+
+# Virtual environment oluştur (opsiyonel ama önerilen)
+
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Windows
+
+venv\Scripts\activate
+
+# Linux/Mac
+
+source venv/bin/activate
 
 # Bağımlılıkları yükle
+
 pip install -r requirements.txt
 
-# Environment variables ayarla
-cp .env.example .env
-# .env dosyasını editleyip gerçek değerleri girin (MySQL şifreniz, vb.)
-
 # MySQL veritabanını oluştur
+
 mysql -u root -p
 CREATE DATABASE uniring_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 exit;
 
 # Şema ve verileri yükle
-mysql -u root -p uniring_db < ../database/schema.sql
-mysql -u root -p uniring_db < ../database/views.sql
-mysql -u root -p uniring_db < ../database/indexes.sql
 
-# Flask uygulamasını başlat
+cd ../database
+mysql -u root -p uniring_db < schema.sql
+mysql -u root -p uniring_db < data.sql
+mysql -u root -p uniring_db < views.sql
+mysql -u root -p uniring_db < indexes.sql
+
+# Backend'i çalıştır
+
+cd ../backend
 python app.py
-```
 
-### Frontend Setup
+Backend `http://localhost:5001` adresinde çalışacaktır.
+
+### Mobile Frontend Setup
 
 ```bash
-cd frontend
+# Mobile klasörüne git
+cd mobile
+
+# Bağımlılıkları yükle
 npm install
-npm start
+
+# Expo uygulamasını başlat
+npx expo start
+
+# Seçenekler:
+# - 'a' tuşuna basarak Android emulator'da aç
+# - 'i' tuşuna basarak iOS simulator'da aç
+# - QR kod ile telefonda Expo Go uygulamasından aç
 ```
 
-Uygulama `http://localhost:3000` adresinde çalışacaktır.
+**Not:** Backend'in `http://localhost:5001` adresinde çalıştığından emin olun. Emulator kullanıyorsanız `mobile/src/constants/config.js` dosyasındaki API URL'ini kontrol edin.
 
-## 📁 Proje Yapısı
+## 📁 Proje 
 
-```
 UNIRING/
 ├── backend/
-│   ├── app.py              # Flask ana dosya
-│   ├── models.py           # SQLAlchemy modelleri
-│   ├── routes/             # API endpoints
+│   ├── app.py                  # Flask ana dosya
+│   ├── models.py               # SQLAlchemy modelleri
+│   ├── routes/
+│   │   ├── auth.py            # Kimlik doğrulama
+│   │   ├── seferler.py        # Sefer işlemleri
+│   │   ├── rezervasyonlar.py  # Rezervasyon yönetimi
+│   │   ├── kullanicilar.py    # Kullanıcı profilleri
+│   │   └── araclar.py         # Araç yönetimi
 │   └── requirements.txt
 ├── database/
-│   ├── schema.sql          # CREATE TABLE scripts
-│   ├── views.sql           # VIEW tanımları
-│   ├── indexes.sql         # INDEX tanımları
-│   └── queries.sql         # Non-trivial sorgular
-├── frontend/
+│   ├── schema.sql             # CREATE TABLE scripts
+│   ├── views.sql              # VIEW tanımları
+│   ├── indexes.sql            # INDEX tanımları
+│   ├── queries.sql            # Non-trivial sorgular
+│   └── data.sql               # Test verisi
+├── mobile/
 │   ├── src/
-│   │   ├── components/     # React componentleri
-│   │   ├── pages/          # Sayfa componentleri
-│   │   └── services/       # API çağrıları
-│   └── package.json
+│   │   ├── components/        # Reusable componentler
+│   │   ├── screens/
+│   │   │   ├── auth/         # Login, Register
+│   │   │   ├── rides/        # Sefer listesi, detay, oluşturma
+│   │   │   └── vehicles/     # Araç yönetimi
+│   │   ├── navigation/       # React Navigation setup
+│   │   ├── services/         # API servisleri
+│   │   ├── context/          # Auth context
+│   │   └── constants/        # Config, colors, fonts
+│   ├── assets/               # Icon, splash screen
+│   ├── package.json
+│   └── app.json
 └── docs/
-    ├── ara_rapor.docx
-    └── son_rapor.docx
-```
+    └── UniringReport.pdf
 
 ## 🔍 Non-Trivial SQL Sorguları
 
@@ -130,20 +173,40 @@ Tüm sorgular `database/queries.sql` dosyasında bulunmaktadır.
 ## 🎨 Uygulama Özellikleri
 
 ### Kullanıcı Fonksiyonları
-- ✅ Kayıt olma ve .edu email doğrulama
-- ✅ Sefer oluşturma (Organizatör)
-- ✅ Sefer arama ve filtreleme
-- ✅ Rezervasyon yapma (Yolcu)
-- ✅ Rezervasyon yönetimi
-- ✅ Sefer bazlı mesajlaşma
-- ✅ Kullanıcı profili ve güvenlik skoru
-- ✅ Cüzdan yönetimi
+
+- ✅ Kayıt olma ve giriş yapma
+- ✅ Profil yönetimi (kompakt accordion tasarım)
+- ✅ Araç ekleme ve yönetimi
+- ✅ Sefer oluşturma (çoklu güzergah noktaları)
+- ✅ Sefer arama ve filtreleme (bugün, yarın, ucuz)
+- ✅ Sefer detayları görüntüleme
+- ✅ Rezervasyon yapma ve yönetimi
+- ✅ Rezervasyon iptali
+- ✅ Kullanıcı değerlendirme sistemi
+- ✅ Güvenlik skoru hesaplama
 
 ### Teknik Özellikler
-- ✅ Mobile-responsive tasarım
+
+- ✅ Mobile-first responsive tasarım
 - ✅ RESTful API
-- ✅ JWT Authentication (opsiyonel)
-- ✅ Real-time updates (opsiyonel)
+- ✅ JWT benzeri token authentication
+- ✅ AsyncStorage ile local data persistence
+- ✅ Pull-to-refresh
+- ✅ Pagination (5 sefer/sayfa)
+- ✅ Real-time validation
+- ✅ Material Design UI (React Native Paper)
+- ✅ Bottom tab navigation
+- ✅ Stack navigation
+
+### UI/UX Özellikleri
+
+- 🎨 Kompakt kart tasarımı
+- 🎨 Floating Action Button (FAB)
+- 🎨 Chip-based araç seçimi
+- 🎨 Status badge'ler
+- 🎨 Empty state handling
+- 🎨 Loading states
+- 🎨 Error handling with user-friendly messages
 
 ## 📈 Performans Optimizasyonları
 
@@ -151,46 +214,88 @@ Tüm sorgular `database/queries.sql` dosyasında bulunmaktadır.
 - **Full-Text Indexes:** Metin araması için (kullanıcı adı, konum)
 - **Covering Indexes:** SELECT sorgularını hızlandırmak için
 - **Query Optimization:** EXPLAIN ile analiz edilmiş sorgular
+- **Frontend Caching:** AsyncStorage ile local caching
+- **Pagination:** Büyük veri setleri için sayfalama
 
 ## 🔒 Güvenlik
 
 - Password hashing (Werkzeug)
 - SQL Injection koruması (SQLAlchemy ORM)
 - CORS yapılandırması
-- Input validation
-
-## 📊 Test Verisi
-
-Test verisi oluşturmak için:
-1. [Mockaroo](https://www.mockaroo.com/) kullanılabilir
-2. `database/sample_data.sql` içinde örnek veri scriptleri bulunur
-3. En az 500-1000 satır veri yüklenmeli
-
-## 📝 Raporlar
-
-- **Ara Rapor:** `docs/ara_rapor.docx` (19 Ekim 2025)
-- **Son Rapor:** `docs/son_rapor.docx` (3 Aralık 2025)
+- Input validation (frontend + backend)
+- Plaka format validation (regex)
+- Email format validation
 
 ## 🎯 Demo Hazırlığı
 
 Demo sunumunda gösterilecekler:
-1. Database schema ve ilişkiler
-2. VIEW'ler ve kullanım örnekleri
-3. Non-trivial SQL sorguları (5-6 adet)
-4. Çalışan uygulama (tüm core fonksiyonlar)
-5. Mobile-responsive tasarım
 
-## 🐛 Bilinen Sorunlar ve TODO
+1. ✅ Database schema ve ilişkiler
+2. ✅ VIEW'ler ve kullanım örnekleri
+3. ✅ Non-trivial SQL sorguları (10+ adet)
+4. ✅ Çalışan mobile uygulama (tüm core fonksiyonlar)
+5. ✅ Mobile-responsive tasarım
+6. ✅ CRUD operasyonları (Araç, Sefer, Rezervasyon)
+7. ✅ Filtreleme ve arama
+8. ✅ Kullanıcı profil yönetimi
 
-- [ ] Frontend componentlerini tamamla
-- [ ] API route'larını implement et
-- [ ] Test verisi yükle
-- [ ] EER diyagramını ekle
-- [ ] Son raporu hazırla
+## 🐛 Bilinen Sorunlar ve Geliştirme Önerileri
+
+### Tamamlanan
+
+- ✅ Backend API routes
+- ✅ Mobile frontend tüm ekranlar
+- ✅ Araç yönetim sistemi
+- ✅ Rezervasyon sistemi
+- ✅ Kullanıcı authentication
+- ✅ UI/UX iyileştirmeleri
+
+### Gelecek Geliştirmeler (Opsiyonel)
+
+- [ ] Real-time chat (Mesajlar tablosu için)
+- [ ] Push notifications
+- [ ] Payment gateway entegrasyonu (Odemeler tablosu için)
+- [ ] Google Maps entegrasyonu
+- [ ] Rating & review sistemi detaylandırma
+- [ ] Admin panel
+
+## 📱 API Endpoints
+
+### Authentication
+
+- `POST /api/auth/register` - Yeni kullanıcı kaydı
+- `POST /api/auth/login` - Kullanıcı girişi
+
+### Seferler
+
+- `GET /api/seferler` - Tüm seferleri listele
+- `GET /api/seferler/:id` - Sefer detayı
+- `GET /api/seferler/benim` - Kullanıcının seferleri
+- `POST /api/seferler` - Yeni sefer oluştur
+- `PUT /api/seferler/:id` - Sefer güncelle
+- `DELETE /api/seferler/:id` - Sefer sil
+
+### Rezervasyonlar
+
+- `GET /api/rezervasyonlar/benim` - Kullanıcının rezervasyonları
+- `POST /api/rezervasyonlar` - Yeni rezervasyon
+- `PUT /api/rezervasyonlar/:id/iptal` - Rezervasyon iptali
+
+### Araçlar
+
+- `GET /api/araclar` - Kullanıcının araçları
+- `POST /api/araclar` - Yeni araç ekle
+- `PUT /api/araclar/:id` - Araç güncelle
+- `DELETE /api/araclar/:id` - Araç sil
+
+### Kullanıcılar
+
+- `GET /api/kullanicilar/:id` - Kullanıcı profili
+- `PUT /api/kullanicilar/:id` - Profil güncelle
 
 ## 📞 İletişim
 
-**Nurefşan Olfaz:** nolfaz@etu.edu.tr  
+**Nurefşan Olfaz:** nolfaz@etu.edu.tr
 **Mehmet Alp Almacı:** malmaci@etu.edu.tr
 
 ## 📄 Lisans
