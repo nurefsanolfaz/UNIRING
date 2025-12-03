@@ -53,38 +53,38 @@ export default function CreateRideScreen({ navigation }) {
   const loadVehicles = async () => {
     try {
       const userId = getUserId();
-      console.log('🔍 Araç yükleniyor, kullanıcı ID:', userId);
+      console.log(' Araç yükleniyor, kullanıcı ID:', userId);
       
       if (!userId) {
-        console.error('❌ Kullanıcı ID bulunamadı');
+        console.error(' Kullanıcı ID bulunamadı');
         Alert.alert('Hata', 'Kullanıcı bilgisi alınamadı. Lütfen tekrar giriş yapın.');
         return;
       }
 
       const response = await vehicleService.getMyVehicles(userId);
-      console.log('📦 Tam araç yanıtı:', JSON.stringify(response, null, 2));
+      console.log('Tam araç yanıtı:', JSON.stringify(response, null, 2));
       
       if (response && response.success) {
         const allVehicles = response.araclar || [];
-        console.log('📋 Tüm araçlar:', allVehicles.length, allVehicles);
+        console.log(' Tüm araçlar:', allVehicles.length, allVehicles);
         
         // Tüm araçları göster (onay durumundan bağımsız)
         setVehicles(allVehicles);
-        console.log('✅ Yüklenen araçlar:', allVehicles.length);
+        console.log(' Yüklenen araçlar:', allVehicles.length);
         
         if (allVehicles.length > 0) {
           setSelectedVehicle(allVehicles[0]);
           setFormData(prev => ({ ...prev, vehicleId: allVehicles[0].aracID.toString() }));
-          console.log('🚗 İlk araç otomatik seçildi:', allVehicles[0].plaka);
+          console.log(' İlk araç otomatik seçildi:', allVehicles[0].plaka);
         } else {
-          console.warn('⚠️ Hiç araç bulunamadı');
+          console.warn(' Hiç araç bulunamadı');
         }
       } else {
-        console.error('❌ API yanıtı başarısız:', response);
+        console.error(' API yanıtı başarısız:', response);
       }
     } catch (error) {
-      console.error('❌ Araç yükleme hatası:', error);
-      console.error('❌ Hata detayı:', error.response?.data || error.message);
+      console.error(' Araç yükleme hatası:', error);
+      console.error(' Hata detayı:', error.response?.data || error.message);
     }
   };
 
@@ -320,7 +320,7 @@ export default function CreateRideScreen({ navigation }) {
             theme={INPUT_THEME}
           />
 
-          <Text style={styles.sectionLabel}>📅 Kalkış Tarihi *</Text>
+          <Text style={styles.sectionLabel}> Kalkış Tarihi *</Text>
           <View style={styles.dateTimeRow}>
             <View style={styles.dateInputWrapper}>
               <TextInput
