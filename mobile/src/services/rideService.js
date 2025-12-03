@@ -60,10 +60,22 @@ export const getMyCreatedRides = async () => {
 // Rezervasyon Oluştur
 export const createBooking = async (rezervasyonData) => {
   try {
-    const response = await api.post('/api/rezervasyonlar', rezervasyonData);
+    const { seferID, ...payload } = rezervasyonData;
+
+    if (!seferID) {
+      console.error('❌ seferID eksik:', rezervasyonData);
+      throw { message: 'seferID bilgisi zorunlu' };
+    }
+
+    const endpoint = `/api/seferler/${seferID}/katil`;
+    console.log('📡 API İsteği:', endpoint, payload);
+    
+    const response = await api.post(endpoint, payload);
+    console.log('✅ API Başarılı:', response.data);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'Rezervasyon oluşturulamadı' };
+    console.error('❌ API Hatası:', error.response?.data || error.message || error);
+    throw error.response?.data || error || { message: 'Rezervasyon oluşturulamadı' };
   }
 };
 
