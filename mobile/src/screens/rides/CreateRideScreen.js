@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, Title, HelperText, Snackbar, Surface, Menu, Divider } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { TextInput, Button, Text, Title, HelperText, Snackbar, Surface, Chip } from 'react-native-paper';
 import { createRide } from '../../services/rideService';
 import vehicleService from '../../services/vehicleService';
 import { COLORS } from '../../constants/config';
@@ -36,31 +36,55 @@ export default function CreateRideScreen({ navigation }) {
   const [snackbar, setSnackbar] = useState({ visible: false, message: '', action: undefined });
   const { user } = useAuth();
   const [vehicles, setVehicles] = useState([]);
-  const [vehicleMenuVisible, setVehicleMenuVisible] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   useEffect(() => {
     loadVehicles();
   }, []);
 
+  useEffect(() => {
+    // Navigation focus olduğunda araçları yeniden yükle
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadVehicles();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const loadVehicles = async () => {
     try {
       const userId = getUserId();
-      if (!userId) return;
+      console.log('🔍 Araç yükleniyor, kullanıcı ID:', userId);
+      
+      if (!userId) {
+        console.error('❌ Kullanıcı ID bulunamadı');
+        Alert.alert('Hata', 'Kullanıcı bilgisi alınamadı. Lütfen tekrar giriş yapın.');
+        return;
+      }
 
       const response = await vehicleService.getMyVehicles(userId);
-      if (response.success) {
-        // Sadece onaylanmış araçları göster
-        const approvedVehicles = response.araclar.filter(v => v.onayDurumu === 'Onaylandı');
-        setVehicles(approvedVehicles);
+      console.log('📦 Tam araç yanıtı:', JSON.stringify(response, null, 2));
+      
+      if (response && response.success) {
+        const allVehicles = response.araclar || [];
+        console.log('📋 Tüm araçlar:', allVehicles.length, allVehicles);
         
-        if (approvedVehicles.length > 0) {
-          setSelectedVehicle(approvedVehicles[0]);
-          setFormData({ ...formData, vehicleId: approvedVehicles[0].aracID.toString() });
+        // Tüm araçları göster (onay durumundan bağımsız)
+        setVehicles(allVehicles);
+        console.log('✅ Yüklenen araçlar:', allVehicles.length);
+        
+        if (allVehicles.length > 0) {
+          setSelectedVehicle(allVehicles[0]);
+          setFormData(prev => ({ ...prev, vehicleId: allVehicles[0].aracID.toString() }));
+          console.log('🚗 İlk araç otomatik seçildi:', allVehicles[0].plaka);
+        } else {
+          console.warn('⚠️ Hiç araç bulunamadı');
         }
+      } else {
+        console.error('❌ API yanıtı başarısız:', response);
       }
     } catch (error) {
-      console.error('Araç yükleme hatası:', error);
+      console.error('❌ Araç yükleme hatası:', error);
+      console.error('❌ Hata detayı:', error.response?.data || error.message);
     }
   };
 
@@ -191,68 +215,85 @@ export default function CreateRideScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Title style={styles.title}>Yeni Yolculuk</Title>
+    <View style={styles.container}>
+      {/* Floating Action Button - Sağ üst köşe */}
+      <Button
+        mode="contained"
+        onPress={handleCreateRide}
+        loading={loading}
+        disabled={loading}
+        style={styles.fab}
+        buttonColor={COLORS.primary}
+        icon="check"
+        contentStyle={styles.fabContent}
+      />
 
-        {!!errorMessage && (
-          <HelperText type="error" style={styles.helperText}>
-            {errorMessage}
-          </HelperText>
-        )}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          <Title style={styles.title}>Yeni Yolculuk</Title>
 
-        <Surface style={styles.formCard} elevation={2}>
+          {!!errorMessage && (
+            <HelperText type="error" style={styles.helperText}>
+              {errorMessage}
+            </HelperText>
+          )}
+
+          <Surface style={styles.formCard} elevation={2}>
           {/* Araç Seçimi */}
-          {vehicles.length > 0 ? (
-            <Menu
-              visible={vehicleMenuVisible}
-              onDismiss={() => setVehicleMenuVisible(false)}
-              anchor={
-                <Button
-                  mode="outlined"
-                  onPress={() => setVehicleMenuVisible(true)}
-                  style={styles.vehicleButton}
-                  icon="car"
-                  contentStyle={styles.vehicleButtonContent}
-                >
-                  {selectedVehicle 
-                    ? `${selectedVehicle.marka} ${selectedVehicle.model} - ${selectedVehicle.plaka}`
-                    : 'Araç Seçin'}
-                </Button>
-              }
-            >
-              {vehicles.map((vehicle) => (
-                <Menu.Item
-                  key={vehicle.aracID}
-                  onPress={() => {
-                    setSelectedVehicle(vehicle);
-                    setFormData({ ...formData, vehicleId: vehicle.aracID.toString() });
-                    setVehicleMenuVisible(false);
-                  }}
-                  title={`${vehicle.marka} ${vehicle.model}`}
-                  leadingIcon="car"
-                />
-              ))}
-              <Divider />
-              <Menu.Item
-                onPress={() => {
-                  setVehicleMenuVisible(false);
-                  navigation.navigate('Profile', { screen: 'AddVehicle' });
-                }}
-                title="Yeni Araç Ekle"
-                leadingIcon="plus"
-              />
-            </Menu>
+          <Text style={styles.sectionLabel}>🚗 Araç Seçimi *</Text>
+          
+          {vehicles.length === 0 ? (
+            <View style={styles.noVehicleContainer}>
+              <Text style={styles.noVehicleText}>Henüz araç eklemediniz</Text>
+              <Button
+                mode="contained"
+                onPress={() => navigation.navigate('Profile', { screen: 'AddVehicle' })}
+                style={styles.addVehicleButton}
+                icon="plus-circle"
+                buttonColor={COLORS.primary}
+              >
+                İlk Aracınızı Ekleyin
+              </Button>
+            </View>
           ) : (
-            <Button
-              mode="outlined"
-              onPress={() => navigation.navigate('Profile', { screen: 'AddVehicle' })}
-              style={styles.vehicleButton}
-              icon="plus-circle"
-              textColor="#F44336"
-            >
-              Önce Araç Ekleyin
-            </Button>
+            <>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.vehiclesScroll}>
+                {vehicles.map((vehicle) => (
+                  <Chip
+                    key={vehicle.aracID}
+                    selected={selectedVehicle?.aracID === vehicle.aracID}
+                    onPress={() => {
+                      setSelectedVehicle(vehicle);
+                      setFormData(prev => ({ ...prev, vehicleId: vehicle.aracID.toString() }));
+                      console.log('✅ Araç seçildi:', vehicle.plaka);
+                    }}
+                    style={[
+                      styles.vehicleChip,
+                      selectedVehicle?.aracID === vehicle.aracID && styles.vehicleChipSelected
+                    ]}
+                    selectedColor={COLORS.primary}
+                    icon="car"
+                  >
+                    {vehicle.marka} {vehicle.model} ({vehicle.plaka})
+                  </Chip>
+                ))}
+                <Chip
+                  icon="plus"
+                  onPress={() => navigation.navigate('Profile', { screen: 'AddVehicle' })}
+                  style={styles.addVehicleChip}
+                  textStyle={styles.addVehicleText}
+                >
+                  Yeni Ekle
+                </Chip>
+              </ScrollView>
+              {selectedVehicle && (
+                <View style={styles.selectedVehicleInfo}>
+                  <Text style={styles.selectedVehicleText}>
+                    ✓ Seçilen: {selectedVehicle.marka} {selectedVehicle.model} - {selectedVehicle.plaka}
+                  </Text>
+                </View>
+              )}
+            </>
           )}
 
           <TextInput
@@ -279,18 +320,44 @@ export default function CreateRideScreen({ navigation }) {
             theme={INPUT_THEME}
           />
 
-          <TextInput
-            label="Kalkış Zamanı * (YYYY-MM-DD HH:MM)"
-            value={formData.departureTime}
-            onChangeText={(text) => setFormData({ ...formData, departureTime: text })}
-            mode="outlined"
-            style={styles.input}
-            placeholder="2025-12-05 15:30"
-            textColor={COLORS.text || '#1F2933'}
-            contentStyle={styles.inputContent}
-            theme={INPUT_THEME}
-            keyboardType="default"
-          />
+          <Text style={styles.sectionLabel}>📅 Kalkış Tarihi *</Text>
+          <View style={styles.dateTimeRow}>
+            <View style={styles.dateInputWrapper}>
+              <TextInput
+                label="Tarih"
+                value={formData.departureTime.split(' ')[0] || ''}
+                onChangeText={(text) => {
+                  const time = formData.departureTime.split(' ')[1] || '00:00';
+                  setFormData({ ...formData, departureTime: `${text} ${time}` });
+                }}
+                mode="outlined"
+                style={styles.dateInput}
+                placeholder="YYYY-MM-DD"
+                textColor={COLORS.text || '#1F2933'}
+                contentStyle={styles.inputContent}
+                theme={INPUT_THEME}
+              />
+            </View>
+            <View style={styles.timeInputWrapper}>
+              <TextInput
+                label="Saat"
+                value={formData.departureTime.split(' ')[1] || ''}
+                onChangeText={(text) => {
+                  const date = formData.departureTime.split(' ')[0] || '';
+                  setFormData({ ...formData, departureTime: `${date} ${text}` });
+                }}
+                mode="outlined"
+                style={styles.timeInput}
+                placeholder="HH:MM"
+                textColor={COLORS.text || '#1F2933'}
+                contentStyle={styles.inputContent}
+                theme={INPUT_THEME}
+              />
+            </View>
+          </View>
+          <HelperText type="info" style={styles.dateHelper}>
+            Örnek: 2025-12-05 15:30
+          </HelperText>
 
           <TextInput
             label="Boş Koltuk Sayısı *"
@@ -331,26 +398,9 @@ export default function CreateRideScreen({ navigation }) {
             theme={INPUT_THEME}
           />
         </Surface>
-
-        <Button
-          mode="contained"
-          onPress={handleCreateRide}
-          loading={loading}
-          disabled={loading}
-          style={styles.button}
-          buttonColor={COLORS.primary}
-        >
-          Yolculuk Oluştur
-        </Button>
-
-        <Button
-          mode="outlined"
-          onPress={() => navigation.goBack()}
-          style={styles.cancelButton}
-        >
-          İptal
-        </Button>
       </View>
+      </ScrollView>
+
       <Snackbar
         visible={snackbar.visible}
         onDismiss={() => setSnackbar({ visible: false, message: '', action: undefined })}
@@ -360,7 +410,7 @@ export default function CreateRideScreen({ navigation }) {
       >
         {snackbar.message}
       </Snackbar>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -369,9 +419,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
   content: {
-    padding: 20,
-    paddingTop: 20,
+    padding: 16,
+    paddingTop: 16,
   },
   formCard: {
     borderRadius: 16,
@@ -380,40 +436,117 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
     color: COLORS.primary,
   },
   helperText: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  vehicleButton: {
-    marginBottom: 15,
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+    marginTop: 5,
+  },
+  noVehicleContainer: {
+    backgroundColor: '#FFF3E0',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  noVehicleText: {
+    fontSize: 13,
+    color: '#E65100',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  addVehicleButton: {
+    marginTop: 5,
+  },
+  vehiclesScroll: {
+    marginBottom: 8,
+  },
+  vehicleChip: {
+    marginRight: 8,
+    marginBottom: 6,
+    backgroundColor: '#F5F5F5',
+  },
+  vehicleChipSelected: {
+    backgroundColor: COLORS.primary + '20',
     borderColor: COLORS.primary,
     borderWidth: 1.5,
   },
-  vehicleButtonContent: {
-    height: 50,
+  addVehicleChip: {
+    marginRight: 8,
+    marginBottom: 6,
+    backgroundColor: '#E3F2FD',
+    borderColor: COLORS.primary,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+  },
+  addVehicleText: {
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  selectedVehicleInfo: {
+    backgroundColor: '#E8F5E9',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  selectedVehicleText: {
+    color: '#2E7D32',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  dateTimeRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 5,
+  },
+  dateInputWrapper: {
+    flex: 2,
+  },
+  dateInput: {
+    flex: 1,
+  },
+  timeInputWrapper: {
+    flex: 1,
+  },
+  timeInput: {
+    flex: 1,
+  },
+  dateHelper: {
+    marginTop: 0,
+    marginBottom: 8,
+    fontSize: 11,
   },
   input: {
-    marginBottom: 15,
+    marginBottom: 12,
   },
   inputContent: {
     backgroundColor: '#f9fafb',
   },
   textAreaContent: {
-    minHeight: 90,
+    minHeight: 80,
     textAlignVertical: 'top',
   },
-  button: {
-    marginTop: 10,
-    paddingVertical: 8,
+  fab: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    borderRadius: 30,
+    elevation: 6,
+    zIndex: 1000,
   },
-  cancelButton: {
-    marginTop: 10,
-    paddingVertical: 8,
+  fabContent: {
+    height: 56,
+    width: 56,
   },
   snackbar: {
     marginHorizontal: 20,

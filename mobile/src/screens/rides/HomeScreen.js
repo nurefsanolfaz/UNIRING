@@ -172,18 +172,18 @@ export default function HomeScreen({ navigation }) {
     const statusStyle = getStatusColor(item.seferDurumu);
     
     return (
-      <Card style={[styles.card, { backgroundColor: '#FFFFFF' }]} onPress={() => navigation.navigate('RideDetail', { seferID: item.seferID })}>
+      <Card style={styles.card} onPress={() => navigation.navigate('RideDetail', { seferID: item.seferID })}>
         <Card.Content>
-          {/* Sefer Tipi Badge + Hızlı Katıl */}
-          <View style={styles.badgeRow}>
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badge}>
-                {item.seferTipi === 'Araç Paylaşımı' ? '🚗 Araç Paylaşımı' : '🤝 Ortak Araç'}
-              </Text>
-              <Text style={[styles.badge, { backgroundColor: statusStyle.bg, color: statusStyle.text }]}>
-                {statusStyle.emoji} {item.seferDurumu}
-              </Text>
-            </View>
+          {/* Başlık Satırı: Durum + Hızlı Katıl */}
+          <View style={styles.headerRow}>
+            <Chip
+              icon={() => <Text style={styles.chipEmoji}>{statusStyle.emoji}</Text>}
+              style={[styles.statusChip, { backgroundColor: statusStyle.bg }]}
+              textStyle={[styles.statusText, { color: statusStyle.text }]}
+              compact
+            >
+              {item.seferDurumu}
+            </Chip>
 
             {bosKoltuk > 0 && (
               <Button
@@ -193,56 +193,49 @@ export default function HomeScreen({ navigation }) {
                 labelStyle={styles.joinButtonLabel}
                 onPress={() => handleQuickJoin(item)}
               >
-                Sefere Katıl
+                Katıl
               </Button>
             )}
           </View>
 
-          {/* Güzergah */}
-          <View style={styles.routeContainer}>
-            <View style={styles.locationContainer}>
-              <Text style={styles.locationLabel}>Kalkış</Text>
-              <Title style={styles.locationText} numberOfLines={1}>{baslangic}</Title>
+          {/* Kompakt Güzergah */}
+          <View style={styles.compactRoute}>
+            <View style={styles.routePoint}>
+              <Text style={styles.routeIcon}>📍</Text>
+              <Text style={styles.routeLocation} numberOfLines={1}>{baslangic}</Text>
             </View>
-            <Text style={styles.arrow}>→</Text>
-            <View style={styles.locationContainer}>
-              <Text style={styles.locationLabel}>Varış</Text>
-              <Title style={styles.locationText} numberOfLines={1}>{varis}</Title>
+            <Text style={styles.routeArrow}>→</Text>
+            <View style={styles.routePoint}>
+              <Text style={styles.routeIcon}>🎯</Text>
+              <Text style={styles.routeLocation} numberOfLines={1}>{varis}</Text>
             </View>
           </View>
 
-          {/* Tarih & Saat */}
-          <View style={styles.infoRow}>
-            <Paragraph>📅 {formatDate(item.kalkisZamani)}</Paragraph>
+          {/* Bilgi Satırı */}
+          <View style={styles.infoLine}>
+            <Text style={styles.infoItem}>📅 {formatDate(item.kalkisZamani).split(',')[0]}</Text>
+            <Text style={styles.infoItem}>🪑 {bosKoltuk}</Text>
+            <Text style={styles.priceTag}>₺{item.temelFiyat}</Text>
           </View>
 
-          {/* Özellikler */}
-          <View style={styles.featuresRow}>
-            {item.bagajAlaniVar && <Text style={styles.feature}>🧳 Bagaj</Text>}
-            {item.klimaVar && <Text style={styles.feature}>❄️ Klima</Text>}
-          </View>
-
-          {/* Alt Bilgiler */}
-          <View style={styles.footerRow}>
-            <View style={styles.seatsContainer}>
-              <Text style={styles.seats}>🪑 {bosKoltuk} boş koltuk</Text>
-            </View>
-            <Text style={styles.price}>💰 {item.temelFiyat} TL</Text>
-          </View>
-
-          {/* Sürücü */}
-          <View style={styles.driverContainer}>
-            <Avatar.Text 
-              size={36} 
-              label={surucu.split(' ').map(n => n[0]).join('')} 
-              style={styles.avatar}
-              color="#fff"
-            />
-            <View style={styles.driverInfo}>
-              <Text style={styles.driver}>👤 {surucu}</Text>
+          {/* Sürücü ve Özellikler */}
+          <View style={styles.bottomRow}>
+            <View style={styles.driverCompact}>
+              <Avatar.Text 
+                size={28} 
+                label={surucu.split(' ').map(n => n[0]).join('')} 
+                style={styles.avatarSmall}
+                color="#fff"
+                labelStyle={styles.avatarLabel}
+              />
+              <Text style={styles.driverName} numberOfLines={1}>{surucu}</Text>
               {item.organizator?.guvenlikSkoru && (
-                <Text style={styles.rating}>⭐ {item.organizator.guvenlikSkoru.toFixed(1)}</Text>
+                <Text style={styles.ratingSmall}>⭐{item.organizator.guvenlikSkoru.toFixed(1)}</Text>
               )}
+            </View>
+            <View style={styles.featuresCompact}>
+              {item.bagajAlaniVar && <Text style={styles.featureIcon}>🧳</Text>}
+              {item.klimaVar && <Text style={styles.featureIcon}>❄️</Text>}
             </View>
           </View>
         </Card.Content>
@@ -468,15 +461,122 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   card: {
-    marginBottom: 20,
-    elevation: 8,
-    backgroundColor: '#FFFFFF',
+    marginBottom: 12,
+    marginHorizontal: 16,
     borderRadius: 16,
-    shadowColor: '#1976D2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statusChip: {
+    height: 28,
+  },
+  chipEmoji: {
+    fontSize: 12,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  compactRoute: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F9FC',
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  routePoint: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  routeIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
+  routeLocation: {
+    ...FONTS.semiBold,
+    fontSize: 14,
+    color: COLORS.text,
+    flex: 1,
+  },
+  routeArrow: {
+    fontSize: 16,
+    color: COLORS.primary,
+    marginHorizontal: 8,
+  },
+  infoLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  infoItem: {
+    ...FONTS.regular,
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  priceTag: {
+    ...FONTS.bold,
+    fontSize: 15,
+    color: '#4CAF50',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  driverCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  avatarSmall: {
+    backgroundColor: COLORS.primary,
+  },
+  avatarLabel: {
+    fontSize: 11,
+  },
+  driverName: {
+    ...FONTS.medium,
+    fontSize: 12,
+    color: COLORS.text,
+    marginLeft: 8,
+    flex: 1,
+  },
+  ratingSmall: {
+    ...FONTS.semiBold,
+    fontSize: 11,
+    color: '#FFA726',
+    marginLeft: 4,
+  },
+  featuresCompact: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  featureIcon: {
+    fontSize: 16,
+  },
+  joinButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    height: 32,
+  },
+  joinButtonLabel: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    marginVertical: 0,
   },
   routeContainer: {
     flexDirection: 'row',
