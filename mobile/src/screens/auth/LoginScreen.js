@@ -15,7 +15,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setSnackbarMessage('⚠️ Lütfen tüm alanları doldurun');
+      setSnackbarMessage(' Lütfen tüm alanları doldurun');
       setSnackbarVisible(true);
       return;
     }
@@ -24,11 +24,11 @@ export default function LoginScreen({ navigation }) {
     try {
       const { user, token } = await login(email, password);
       authLogin(user, token);
-      setSnackbarMessage('✅ Giriş yapıldı!');
+      setSnackbarMessage(' Giriş yapıldı!');
       setSnackbarVisible(true);
     } catch (error) {
       console.error('Login hatası:', error);
-      setSnackbarMessage('❌ ' + (error.message || 'Giriş başarısız'));
+      setSnackbarMessage(' ' + (error.message || 'Giriş başarısız'));
       setSnackbarVisible(true);
     } finally {
       setLoading(false);
