@@ -17,13 +17,11 @@ export const login = async (email, password) => {
     const response = await api.post('/api/auth/login', { email, sifre: password });
     const data = response.data || {};
 
-    // Backend tarafı kullanıcı objesini "kullanici" anahtarı ile döndürüyor
     const user = data.user || data.kullanici;
     if (!user) {
       throw { message: 'Kullanıcı bilgisi alınamadı' };
     }
 
-    // Henüz JWT olmadığı için kullanıcı ID'sini pseudo token olarak tutuyoruz
     const token = data.token || String(user.kullaniciID);
 
     await AsyncStorage.setItem('userData', JSON.stringify(user));
